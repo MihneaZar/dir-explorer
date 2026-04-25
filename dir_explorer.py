@@ -328,6 +328,8 @@ def explore_loop(current_path="."):
 
             if filename and not filename.isspace():
                 try:
+                    if '.' in file[1:] and '.' not in filename[1:]:
+                        filename = filename + file[file.rfind('.'):]
                     os.rename(f'{current_path}{NEXT_DIR}{file}', f'{current_path}{NEXT_DIR}{filename}')
 
                     files = get_files(current_path)

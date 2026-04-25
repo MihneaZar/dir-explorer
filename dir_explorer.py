@@ -1,7 +1,7 @@
 import sys
 sys.path.append('C:\\Users\\Mihnea\\Desktop\\Random thoughts\\Cool stuff\\ConsoleListInterface')
 
-from console_list_interface import ConsoleInterface, waitForEnter # pyright: ignore[reportMissingImports]
+from ConsoleListInterface import ConsoleListInterface, waitForEnter # pyright: ignore[reportMissingImports]
 from send2trash import send2trash
 from termcolor import colored
 from filetype import is_image
@@ -145,7 +145,7 @@ def explore_loop(current_path="."):
 
     files = get_files(current_path)
 
-    console = ConsoleInterface(items=files, specialCommands=COMMAND_LIST, helpPage=HELP_PAGE, printFunc=lambda filename, max_name_width: print_filename(filename, max_name_width, current_path))
+    console = ConsoleListInterface(items=files, specialCommands=COMMAND_LIST, helpPage=HELP_PAGE, printFunc=lambda filename, max_name_width: print_filename(filename, max_name_width, current_path))
 
     while (True):
         command, curr_pos = console.interact()

@@ -276,7 +276,6 @@ def explore_loop(current_path="."):
 
         # open in powershell
         if command == '`':
-            os.chdir(current_path)
             os.startfile("powershell.exe") # open powershell in Windows
             continue
 

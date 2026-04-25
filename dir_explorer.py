@@ -39,7 +39,7 @@ Controls:
                     - for file w/  extension: "{filename}.{extension}";
                     - for file w/o extension: "{filename}.";
                     - for directory:          "{filename}".
-    - ctrl+r     -> rename selected directory / file.
+    - ctrl+r     -> rename selected directory / file (if removing extension, do "{filename}.").
     - delete     -> move directory / file to recycle bin.
     - ctrl+b     -> open recycle bin in Windows File Explorer.
     - ctrl+u     -> update list (if directory was changed outside this app or terminal window was resized).
@@ -334,6 +334,9 @@ def explore_loop(current_path="."):
 
                     files = get_files(current_path)
                     console.updateList(files)
+
+                    if filename[-1] == '.':
+                        filename = filename[:-1]
                     
                     new_position = files.index(filename)
                     console.updatePos(new_position)

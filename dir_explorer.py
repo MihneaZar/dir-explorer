@@ -13,7 +13,8 @@ import os
 
 sys.stderr = open(f'C:/Users/Mihnea/Desktop/Random thoughts/Cool stuff/dir_explorer/errors.txt', "a")
 
-NEXT_DIR = '\\'
+NEXT_DIR  = '\\'
+HOMEDRIVE = os.environ["HOMEDRIVE"] 
 
 
 COMMAND_LIST = [key.ENTER, key.CTRL_O, key.BACKSPACE, key.CTRL_T, key.CTRL_P, key.TAB, '`', '~', 
@@ -54,8 +55,8 @@ def get_files(current_path):
     files += [file for file in os.listdir(current_path) if not os.path.isdir(current_path + NEXT_DIR + file) # then files
                                                            and file[file.find('.') + 1:] != "ini"]           # that aren't the .ini Windows file for dirs
     
-    if current_path == "C:\\":
-        os.system("title Local Disk (C:) - Explore")
+    if current_path == f'{HOMEDRIVE}\\':
+        os.system(f'title Local Disk ({HOMEDRIVE}) - Explore')
             
     else:  
         os.system(f'title {current_path[current_path.rfind(NEXT_DIR) + 1:]} - Explore')
@@ -82,8 +83,8 @@ def print_filename(filename, max_name_width, current_path):
 
 
 def print_tree(current_path):
-    if current_path == "C:\\":
-        os.system("title Local Disk (C:) - Tree")
+    if current_path == f'{HOMEDRIVE}\\':
+        os.system(f'title Local Disk ({HOMEDRIVE}) - Tree')
             
     else:  
         os.system(f'title {current_path[current_path.rfind(NEXT_DIR) + 1:]} - Tree')
@@ -157,7 +158,7 @@ def explore_loop(current_path="."):
             try:
                 file = files[curr_pos]
                 if os.path.isdir(current_path + NEXT_DIR + file):
-                    current_path += NEXT_DIR + file if current_path != "C:\\" else file
+                    current_path += NEXT_DIR + file if current_path != f'{HOMEDRIVE}\\' else file
                     changed_directory = True
                     
                     files = get_files(current_path)
@@ -230,8 +231,8 @@ def explore_loop(current_path="."):
         if command == key.BACKSPACE:
             prev_dir = current_path[current_path.rfind(NEXT_DIR) + 1:]
             current_path = current_path[0:current_path.rfind(NEXT_DIR)]
-            if current_path == "C:":
-                current_path = "C:\\"
+            if current_path == HOMEDRIVE:
+                current_path = f'{HOMEDRIVE}\\'
                 
             files = get_files(current_path)
             os.chdir(current_path) # changing working directory to current one
@@ -260,8 +261,8 @@ def explore_loop(current_path="."):
 
                 console.separateInteraction(message=f'\n{e}.\n')
 
-            if current_path == "C:\\":
-                os.system("title Local Disk (C:) - Explore")
+            if current_path == '{HOMEDRIVE}\\':
+                os.system(f'title Local Disk ({HOMEDRIVE}) - Explore')
                     
             else:  
                 os.system(f'title {current_path[current_path.rfind(NEXT_DIR) + 1:]} - Explore')
@@ -406,7 +407,7 @@ def main():
         print("\nConsole application for easier movement through directories.")
         print("\nUsage: 'explore [rel_path | abs_path]'\n")
         print("Dir-Explorer will be open in directory given as path.")
-        print("Or it will open in Desktop if no path is given or if path does not lead to a directory.\n")
+        print("Or it will open in current directory if no path is given or if path does not lead to a directory.\n")
 
     else:
         current_path = " ".join(sys.argv[1:])

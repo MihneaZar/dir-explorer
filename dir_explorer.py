@@ -12,6 +12,10 @@ if ".paths" not in os.listdir(HOMEPATH):
     
     while console_path and not console_path.isspace() and not os.path.exists(f'{console_path}/ConsoleListInterface.py'):
         console_path = input("\nConsoleListInterface.py not found, please download and type path to directory:\n") 
+        if console_path[0] == '"':
+            console_path = console_path[1:]
+        if console_path[-1] == '"':
+            console_path = console_path[:-1]
     
     if not console_path or console_path.isspace():
         quit()
@@ -19,6 +23,7 @@ if ".paths" not in os.listdir(HOMEPATH):
     open(f'{HOMEPATH}/.paths', 'w').write(console_path)
 
 sys.path.append(open(f'{HOMEPATH}/.paths').read())
+
 
 from ConsoleListInterface import ConsoleListInterface, waitForEnter # pyright: ignore[reportMissingImports]
 from send2trash import send2trash

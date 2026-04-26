@@ -3,19 +3,26 @@ import os
 
 HOMEPATH = os.path.dirname(os.path.realpath(__file__))
 
-if ".paths" not in os.listdir(HOMEPATH):
+if not os.path.exists(f'{HOMEPATH}/.paths') or not os.path.exists(f'{open(f"{HOMEPATH}/.paths").read()}/ConsoleListInterface.py'):
     console_path = input("Please type path to directory of ConsoleListInterface.py (or leave empty to cancel):\n")
-    if console_path[0] == '"':
-        console_path = console_path[1:]
-    if console_path[-1] == '"':
-        console_path = console_path[:-1]
-    
-    while console_path and not console_path.isspace() and not os.path.exists(f'{console_path}/ConsoleListInterface.py'):
-        console_path = input("\nConsoleListInterface.py not found, please download and type path to directory:\n") 
+    if console_path:
         if console_path[0] == '"':
             console_path = console_path[1:]
         if console_path[-1] == '"':
             console_path = console_path[:-1]
+    
+    while (console_path and not console_path.isspace() and not os.path.exists(f'{console_path}/ConsoleListInterface.py')) \
+            or ('./' in console_path or '.\\' in console_path): 
+        # avoiding relative paths, they might cause issues
+        if ('./' in console_path or '.\\' in console_path): 
+            console_path = input("Please use the absolute path:\n") 
+        else: 
+            console_path = input("ConsoleListInterface.py not found, please try again:\n") 
+        if console_path:
+            if console_path[0] == '"':
+                console_path = console_path[1:]
+            if console_path[-1] == '"':
+                console_path = console_path[:-1]
     
     if not console_path or console_path.isspace():
         quit()

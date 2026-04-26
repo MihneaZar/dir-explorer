@@ -1,5 +1,24 @@
 import sys
-sys.path.append('C:\\Users\\Mihnea\\Desktop\\Random thoughts\\Cool stuff\\ConsoleListInterface')
+import os
+
+HOMEPATH = os.path.dirname(os.path.realpath(__file__))
+
+if ".paths" not in os.listdir(HOMEPATH):
+    console_path = input("Please type path to directory of ConsoleListInterface.py (or leave empty to cancel):\n")
+    if console_path[0] == '"':
+        console_path = console_path[1:]
+    if console_path[-1] == '"':
+        console_path = console_path[:-1]
+    
+    while console_path and not console_path.isspace() and not os.path.exists(f'{console_path}/ConsoleListInterface.py'):
+        console_path = input("\nConsoleListInterface.py not found, please download and type path to directory:\n") 
+    
+    if not console_path or console_path.isspace():
+        quit()
+
+    open(f'{HOMEPATH}/.paths', 'w').write(console_path)
+
+sys.path.append(open(f'{HOMEPATH}/.paths').read())
 
 from ConsoleListInterface import ConsoleListInterface, waitForEnter # pyright: ignore[reportMissingImports]
 from send2trash import send2trash
@@ -9,11 +28,10 @@ from readchar import key
 import subprocess
 import pyperclip
 import sys
-import os
 
-sys.stderr = open(f'C:/Users/Mihnea/Desktop/Random thoughts/Cool stuff/dir_explorer/errors.txt', "a")
+sys.stderr = open(f'{HOMEPATH}/errors.txt', "a")
 
-NEXT_DIR  = '\\'
+NEXT_DIR  = '\\' # preferable for certain functionalities (rather than '/')
 HOMEDRIVE = os.environ["HOMEDRIVE"] 
 
 

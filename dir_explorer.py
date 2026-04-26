@@ -435,7 +435,7 @@ def explore_loop(current_path="."):
 def main():
     if (len(sys.argv) == 2 and sys.argv[1] in ["-h", "--help"]):
         print("\nConsole application for easier movement through directories.")
-        print("\nUsage: 'explore [rel_path | abs_path]'\n")
+        print("\nUsage: 'python3 dir_explorer [rel_path | abs_path]'\n")
         print("Dir-Explorer will be open in directory given as path.")
         print("Or it will open in current directory if no path is given or if path does not lead to a directory.\n")
 

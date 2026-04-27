@@ -47,8 +47,8 @@ NEXT_DIR  = '\\' # preferable for certain functionalities (rather than '/')
 HOMEDRIVE = os.environ["HOMEDRIVE"] 
 
 
-COMMAND_LIST = [key.ENTER, key.CTRL_O, key.BACKSPACE, key.CTRL_T, key.CTRL_P, key.TAB, '`', '~', 
-                key.CTRL_N, key.CTRL_R, key.DELETE, key.CTRL_B, key.CTRL_U, key.ESC]
+COMMAND_LIST = [key.ENTER, key.CTRL_O, key.BACKSPACE, key.CTRL_T, key.CTRL_D, key.CTRL_P, key.TAB, 
+                '`', '~', key.CTRL_N, key.CTRL_R, key.DELETE, key.CTRL_B, key.CTRL_U, key.ESC]
 HELP_PAGE    = """
 Console application for easier movement through directories.
 
@@ -58,11 +58,12 @@ Controls:
     - ctrl+f     -> search for the next directory / file that contains string, if it exists (not case sensitive).
     - '\\'        -> find next directory / file that contains last searched string.
     - enter      -> for directory: switch to the selected directory;
-                 -> for file: open file in default program (or program selector if none).
+                 -> for file: open selected file in default program (or program selector if none).
     - ctrl+o     -> open images in paint, python files in vs code, others in notepad.
     - backspace  -> return to parent directory of current directory.
     - ctrl+t     -> print the tree of the current directory.
-    - ctrl+p     -> print the path of the current directory (and save it to clipboard).
+    - ctrl+p     -> print the path of the current file (and save it to clipboard).
+    - ctrl+d     -> print the path of the current directory (and save it to clipboard).
     - tab        -> open current directory in file explorer.
     - '`'        -> open current directory in powershell.
     - '~'        -> open current directory in another dir-explorer.
@@ -424,10 +425,15 @@ def explore_loop(current_path="."):
             console.exitInterface()
             quit()
 
-
-        # debugging current path
+        # print path to selected file and copy it to clipboard
         if command == key.CTRL_P:
-            console.separateInteraction(message=f'Current path copied to clipboard:\n{current_path}\n')
+            file = files[curr_pos] 
+            console.separateInteraction(message=f'Path to selected file copied to clipboard:\n{(current_path + NEXT_DIR + file).replace(NEXT_DIR, "/")}\n')
+            pyperclip.copy(current_path)
+
+        # print path to current directory and copy it to clipboard
+        if command == key.CTRL_D:
+            console.separateInteraction(message=f'Path to current directory copied to clipboard:\n{current_path.replace(NEXT_DIR, "/")}\n')
             pyperclip.copy(current_path)
             
 

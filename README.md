@@ -5,6 +5,8 @@ Console application for easier movement through directories (since W11 File Expl
 - The [ConsoleListInterface](https://github.com/MihneaZar/ConsoleListInterface/) class for the console interface;
 - The [python-readchar](https://pypi.org/project/readchar/) library for reading keystrokes;
 - The [cursor](https://pypi.org/project/cursor/) library for hiding the cursor in console.
+- The [filetype](https://pypi.org/project/filetype/) library for checking if files are images.
+- The [pyperclip](https://pypi.org/project/pyperclip/) library for copying paths to clipboard.
 
 ## Additional Information
 The commands 'python3 dir_explorer.py -h' or 'python3 dir_explorer.py --help' explain how to give a path to the Dir-Explorer. <br>

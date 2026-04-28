@@ -437,7 +437,6 @@ def explore_loop(current_path="."):
             pyperclip.copy(current_path.replace(NEXT_DIR, "/"))
             
 
-
 def main():
     if (len(sys.argv) == 2 and sys.argv[1] in ["-h", "--help"]):
         print("\nConsole application for easier movement through directories.")

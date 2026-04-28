@@ -4,8 +4,9 @@ Console application for easier movement through directories (since W11 File Expl
 ## Requirements
 - The [ConsoleListInterface](https://github.com/MihneaZar/ConsoleListInterface/) class for the console interface;
 - The [python-readchar](https://pypi.org/project/readchar/) library for reading keystrokes;
-- The [cursor](https://pypi.org/project/cursor/) library for hiding the cursor in console.
-- The [filetype](https://pypi.org/project/filetype/) library for checking if files are images.
+- The [cursor](https://pypi.org/project/cursor/) library for hiding the cursor in console;
+- The [filetype](https://pypi.org/project/filetype/) library for checking if files are images;
+- The [Send2Trash](https://pypi.org/project/Send2Trash/) library for sending files to trash / recycle bin;
 - The [pyperclip](https://pypi.org/project/pyperclip/) library for copying paths to clipboard.
 
 ## Additional Information

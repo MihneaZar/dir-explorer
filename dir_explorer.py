@@ -3,22 +3,47 @@ import os
 
 HOMEPATH = os.path.dirname(os.path.realpath(__file__))
 
+
 def get_path(path, must_exist=True, check_dir=False, check_file=False, replace_quotes=True):
+    if path == "":
+        raise ValueError("empty")
+    
+    if path.isspace():
+        raise ValueError("space")
+    
     realpath = os.path.realpath(path)
+    
+    if must_exist and not os.path.exists(realpath):
+        raise ValueError("not exists")
+    
+    if check_dir and not os.path.isdir(realpath):
+        raise ValueError("not dir")
+    
+    if check_file and not os.path.isfile(realpath):
+        raise ValueError("not file")
+
     if replace_quotes:
         realpath = realpath.replace('\"', '')
         realpath = realpath.replace('\'', '')
-    if realpath == "" or realpath.isspace() or (must_exist and not os.path.exists(realpath)) or (check_dir and not os.path.isdir(realpath)) or (check_file and not os.path.isfile(realpath)):
-        realpath = None
     
     return realpath
 
 
 if not os.path.exists(f'{HOMEPATH}/.paths') or not os.path.exists(f'{open(f"{HOMEPATH}/.paths").read()}/ConsoleListInterface.py'):
-    console_path = get_path(input("Please type path to directory of ConsoleListInterface.py (or leave empty to cancel):\n"), check_dir=True)
-    
-    while console_path and not os.path.exists(f'{console_path}/ConsoleListInterface.py'): 
-        console_path = get_path(input("ConsoleListInterface.py not found, please try again:\n"), check_dir=True)   
+    print("Please type path to directory of ConsoleListInterface.py (or leave empty to cancel):")
+
+    while True: 
+        try:
+            console_path = get_path(input(), check_dir=True)
+            accepted = os.path.exists(f'{console_path}/ConsoleListInterface.py')
+        except Exception as e:
+            console_path = ""
+            accepted = str(e) in ["empty", "space"]
+        finally:
+            if accepted:
+                break
+            else:
+                print("ConsoleListInterface.py not found, please try again:")
 
     if not console_path:
         quit()

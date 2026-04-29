@@ -3,28 +3,24 @@ import os
 
 HOMEPATH = os.path.dirname(os.path.realpath(__file__))
 
+def get_path(path, must_exist=True, check_dir=False, check_file=False, replace_quotes=True):
+    realpath = os.path.realpath(path)
+    if replace_quotes:
+        realpath = realpath.replace('\"', '')
+        realpath = realpath.replace('\'', '')
+    if realpath == "" or realpath.isspace() or (must_exist and not os.path.exists(realpath)) or (check_dir and not os.path.isdir(realpath)) or (check_file and not os.path.isfile(realpath)):
+        realpath = None
+    
+    return realpath
+
+
 if not os.path.exists(f'{HOMEPATH}/.paths') or not os.path.exists(f'{open(f"{HOMEPATH}/.paths").read()}/ConsoleListInterface.py'):
-    console_path = input("Please type path to directory of ConsoleListInterface.py (or leave empty to cancel):\n")
-    if console_path:
-        if console_path[0] == '"':
-            console_path = console_path[1:]
-        if console_path[-1] == '"':
-            console_path = console_path[:-1]
+    console_path = get_path(input("Please type path to directory of ConsoleListInterface.py (or leave empty to cancel):\n"), check_dir=True)
     
-    while (console_path and not console_path.isspace() and not os.path.exists(f'{console_path}/ConsoleListInterface.py')) \
-            or ('./' in console_path or '.\\' in console_path): 
-        # avoiding relative paths, they might cause issues
-        if ('./' in console_path or '.\\' in console_path): 
-            console_path = input("Please use the absolute path:\n") 
-        else: 
-            console_path = input("ConsoleListInterface.py not found, please try again:\n") 
-        if console_path:
-            if console_path[0] == '"':
-                console_path = console_path[1:]
-            if console_path[-1] == '"':
-                console_path = console_path[:-1]
-    
-    if not console_path or console_path.isspace():
+    while console_path and not os.path.exists(f'{console_path}/ConsoleListInterface.py'): 
+        console_path = get_path(input("ConsoleListInterface.py not found, please try again:\n"), check_dir=True)   
+
+    if not console_path:
         quit()
 
     open(f'{HOMEPATH}/.paths', 'w').write(console_path)

@@ -29,13 +29,13 @@ def get_path(path, must_exist=True, check_dir=False, check_file=False, replace_q
     return realpath
 
 
-if not os.path.exists(f'{HOMEPATH}/.paths') or not os.path.exists(f'{open(f"{HOMEPATH}/.paths").read()}/ConsoleListInterface.py'):
+if not os.path.isfile(f'{HOMEPATH}/.paths') or not os.path.isfile(f'{open(f"{HOMEPATH}/.paths").read()}/ConsoleListInterface.py'):
     print("Please type path to directory of ConsoleListInterface.py (or leave empty to cancel):")
 
     while True: 
         try:
             console_path = get_path(input(), check_dir=True)
-            accepted = os.path.exists(f'{console_path}/ConsoleListInterface.py')
+            accepted = os.path.isfile(f'{console_path}/ConsoleListInterface.py')
         except Exception as e:
             console_path = ""
             accepted = str(e) in ["empty", "space"]

@@ -320,7 +320,20 @@ def explore_loop(current_path="."):
                 os.system(f'title {current_path[current_path.rfind(NEXT_DIR) + 1:]} - Explore')
 
             continue
-        
+
+        # print path to selected file and copy it to clipboard
+        if command == key.CTRL_P:
+            file = files[curr_pos] 
+            console.separateInteraction(message=f'Path to selected file copied to clipboard:\n{(current_path + NEXT_DIR + file).replace(NEXT_DIR, "/")}\n')
+            pyperclip.copy((current_path + NEXT_DIR + file).replace(NEXT_DIR, "/"))
+            continue
+
+        # print path to current directory and copy it to clipboard
+        if command == key.CTRL_D:
+            console.separateInteraction(message=f'Path to current directory copied to clipboard:\n{current_path.replace(NEXT_DIR, "/")}\n')
+            pyperclip.copy(current_path.replace(NEXT_DIR, "/"))
+            continue 
+
 
         # open in file explorer
         if command == key.TAB:
@@ -445,17 +458,6 @@ def explore_loop(current_path="."):
         if command == key.ESC:
             console.exitInterface()
             quit()
-
-        # print path to selected file and copy it to clipboard
-        if command == key.CTRL_P:
-            file = files[curr_pos] 
-            console.separateInteraction(message=f'Path to selected file copied to clipboard:\n{(current_path + NEXT_DIR + file).replace(NEXT_DIR, "/")}\n')
-            pyperclip.copy((current_path + NEXT_DIR + file).replace(NEXT_DIR, "/"))
-
-        # print path to current directory and copy it to clipboard
-        if command == key.CTRL_D:
-            console.separateInteraction(message=f'Path to current directory copied to clipboard:\n{current_path.replace(NEXT_DIR, "/")}\n')
-            pyperclip.copy(current_path.replace(NEXT_DIR, "/"))
             
 
 def main():

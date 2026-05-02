@@ -51,16 +51,16 @@ Controls:
 """ 
 
 
-def get_files(current_path):
+def get_files(console, current_path):
     files  = [dir for dir in os.listdir(current_path) if os.path.isdir(current_path + NEXT_DIR + dir)]       # putting directories first 
     files += [file for file in os.listdir(current_path) if not os.path.isdir(current_path + NEXT_DIR + file) # then files
                                                            and file[file.find('.') + 1:] != "ini"]           # that aren't the .ini Windows file for dirs
     
     if current_path == f'{HOMEDRIVE}\\':
-        os.system(f'title Local Disk ({HOMEDRIVE}) - Explore')
+        console.setTopText(f'{HOMEDRIVE.replace(":", "")}:\n\n')
             
     else:  
-        os.system(f'title {current_path[current_path.rfind(NEXT_DIR) + 1:]} - Explore')
+        console.setTopText(f'{current_path}:\n\n')
 
     return files
 
@@ -143,11 +143,12 @@ def explore_loop(current_path="."):
         os.chdir(current_path)
         current_path = os.getcwd()
 
-    # current_path = "C:\\Users\\Mihnea"
+    console = ConsoleListInterface(items=[], specialCommands=COMMAND_LIST, helpPage=HELP_PAGE, printFunc=lambda filename, max_name_width: print_filename(filename, max_name_width, current_path))
+    console.setTitle("Dir-Explorer")
 
-    files = get_files(current_path)
+    files = get_files(console, current_path)
 
-    console = ConsoleListInterface(items=files, specialCommands=COMMAND_LIST, helpPage=HELP_PAGE, printFunc=lambda filename, max_name_width: print_filename(filename, max_name_width, current_path))
+    console.updateList(files)
 
     while (True):
         command, curr_pos = console.interact()
@@ -162,7 +163,7 @@ def explore_loop(current_path="."):
                     current_path += NEXT_DIR + file if current_path != f'{HOMEDRIVE}\\' else file
                     changed_directory = True
                     
-                    files = get_files(current_path)
+                    files = get_files(console, current_path)
                     os.chdir(current_path) # changing working directory to current one
                     
                     console.updateList(files)
@@ -235,7 +236,7 @@ def explore_loop(current_path="."):
             if current_path == HOMEDRIVE:
                 current_path = f'{HOMEDRIVE}\\'
                 
-            files = get_files(current_path)
+            files = get_files(console, current_path)
             os.chdir(current_path) # changing working directory to current one
 
             console.updateList(files)
@@ -318,7 +319,7 @@ def explore_loop(current_path="."):
                     else:
                         os.mkdir(f'{current_path}{NEXT_DIR}{filename}')
 
-                    files = get_files(current_path)
+                    files = get_files(console, current_path)
                     console.updateList(files)
 
                     new_position = files.index(filename)
@@ -346,7 +347,7 @@ def explore_loop(current_path="."):
                         filename = filename + file[file.rfind('.'):]
                     os.rename(f'{current_path}{NEXT_DIR}{file}', f'{current_path}{NEXT_DIR}{filename}')
 
-                    files = get_files(current_path)
+                    files = get_files(console, current_path)
                     console.updateList(files)
 
                     if filename[-1] == '.':
@@ -371,7 +372,7 @@ def explore_loop(current_path="."):
                 file = files[curr_pos]
                 send2trash(current_path + NEXT_DIR + file)
 
-                files = get_files(current_path)
+                files = get_files(console, current_path)
                 console.updateList(files)
 
                 curr_pos -= 1
@@ -399,7 +400,7 @@ def explore_loop(current_path="."):
             
         # update current directory (when it was changed outside the app)
         if command == key.CTRL_U:
-            files = get_files(current_path)
+            files = get_files(console, current_path)
             console.updateList(files)
             continue
 

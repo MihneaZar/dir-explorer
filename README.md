@@ -14,3 +14,7 @@ The commands 'python3 dir_explorer.py -h' or 'python3 dir_explorer.py --help' ex
 On first use, it will prompt user to give the path to the ConsoleInterfaceList.py file (containing the respective class). <br>
 Typing '?' while in the app will print the help page. <br>
 Only tested on Windows 11.
+
+-------------------------------------------------------------------------
+
+*Copyright (c) 2026 Mihnea Bogdan Zarojanu*

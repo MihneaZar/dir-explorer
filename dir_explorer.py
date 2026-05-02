@@ -1,4 +1,4 @@
-from ConsoleListInterface.Interface import ConsoleListInterface, waitForEnter # pyright: ignore[reportMissingImports]
+from ConsoleListInterface import ConsoleListInterface, waitForEnter
 from send2trash import send2trash
 from termcolor import colored
 from filetype import is_image

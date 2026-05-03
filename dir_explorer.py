@@ -19,8 +19,7 @@ HOMEDRIVE = os.environ["HOMEDRIVE"]
 
 COMMAND_LIST = [key.ENTER, key.CTRL_O, key.BACKSPACE, key.CTRL_T, key.CTRL_D, key.CTRL_P, key.TAB, 
                 '`', '~', key.CTRL_N, key.CTRL_R, key.DELETE, key.CTRL_B, key.CTRL_U, key.ESC]
-HELP_PAGE    = """
-Console application for easier movement through directories.
+HELP_PAGE    = """Console application for easier movement through directories.
 
 Controls:
     - arrow keys -> moving between files in the current directory.

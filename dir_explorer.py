@@ -56,10 +56,10 @@ def get_files(console, current_path):
                                                            and file[file.find('.') + 1:] != "ini"]           # that aren't the .ini Windows file for dirs
     
     if current_path == f'{HOMEDRIVE}\\':
-        console.setTopText(f'{HOMEDRIVE.replace(":", "")}:\n')
+        console.setTopText(colored(f'{HOMEDRIVE.replace(":", "")}:\n', 'light_yellow'))
             
     else:  
-        console.setTopText(f'{current_path}:\n')
+        console.setTopText(colored(f'{current_path}:\n', 'light_yellow'))
 
     return files
 

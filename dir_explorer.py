@@ -1,23 +1,32 @@
-from ConsoleListInterface import ConsoleListInterface, waitForEnter
+from ConsoleListInterface import ConsoleListInterface, MenuInterface, waitForEnter
 from send2trash import send2trash
 from termcolor import colored
 from filetype import is_image
 from readchar import key
 import subprocess
 import pyperclip
+import cursor
+import yaml
 import sys
 import os
 
 
 HOMEPATH = os.path.dirname(os.path.realpath(__file__))
+DATAPATH = f"{HOMEPATH}/data"
 
-sys.stderr = open(f'{HOMEPATH}/errors.txt', "a")
+sys.stderr = open(f'{DATAPATH}/errors.txt', "a")
 
 NEXT_DIR  = '\\' # preferable for certain functionalities (rather than '/')
 HOMEDRIVE = os.environ["HOMEDRIVE"] 
 
+# for running python files / .exe's
+RUN_HERE  = "Run in the same tab"
+RUN_CLOSE = "Run in another tab and close it once finished"
+RUN_STAY  = "Run in another tab and keep it open once finished"
+RUN_TYPES = [RUN_HERE, RUN_CLOSE, RUN_STAY]
 
-COMMAND_LIST = [key.ENTER, key.CTRL_O, key.BACKSPACE, key.CTRL_T, key.CTRL_D, key.CTRL_P, key.TAB, 
+
+COMMAND_LIST = [key.ENTER, key.CTRL_S, key.CTRL_O, key.BACKSPACE, key.CTRL_T, key.CTRL_D, key.CTRL_P, key.TAB, 
                 '`', '~', key.CTRL_N, key.CTRL_R, key.DELETE, key.CTRL_B, key.CTRL_U, key.ESC]
 HELP_PAGE    = """Console application for easier movement through directories.
 
@@ -27,7 +36,8 @@ Controls:
     - ctrl+f     -> search for the next directory / file that contains string, if it exists (not case sensitive).
     - '\\'        -> find next directory / file that contains last searched string.
     - enter      -> for directory: switch to the selected directory;
-                 -> for file: open selected file in default program (or program selector if none).
+                 -> for file: if '.py', '.bat', '.exe' or '.sh' attempt to run, else open in default program.
+    - ctrl+s     -> open menu to select the running type for runnable files.
     - ctrl+o     -> open images in paint, python files in vs code, others in notepad.
     - backspace  -> return to parent directory of current directory.
     - ctrl+t     -> print the tree of the current directory.
@@ -36,10 +46,9 @@ Controls:
     - tab        -> open current directory in file explorer.
     - '`'        -> open current directory in powershell.
     - '~'        -> open current directory in another dir-explorer.
-    - ctrl+n     -> create new directory or file:
-                    - for file w/  extension: "{filename}.{extension}";
-                    - for file w/o extension: "{filename}.";
-                    - for directory:          "{filename}".
+    - ctrl+n     -> create file w/  extension: "{filename}.{extension}";
+                 -> create file w/o extension: "{filename}.";
+                 -> create directory:          "{filename}".
     - ctrl+r     -> rename selected directory / file (if removing extension, do "{filename}.").
     - delete     -> move directory / file to recycle bin.
     - ctrl+b     -> open recycle bin in Windows File Explorer.
@@ -124,6 +133,53 @@ def print_tree(current_path):
     waitForEnter()
 
 
+def select_run_type(run_type):
+    menu = MenuInterface(yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml")))
+
+    while True:
+        path = menu.interactWithMenu()
+
+        # ignoring backspace 
+        if not path:
+            continue
+
+        if path[0] in RUN_TYPES:
+            # same running type selected
+            if path[0] == run_type:
+                continue
+
+            changes = MenuInterface.selectOption(selectedOption=run_type, newSelectedOption=path[0], options=RUN_TYPES, padding=False, selectText=" (selected)")
+            menu.changeOptionNames([], changes)
+
+            run_type = path[0]
+            continue
+
+        if path[0] == "Exit":
+            yaml.safe_dump(menu.getMenuStructure(), open(f"{DATAPATH}/running_type_menu.yaml", 'w'), indent=4, sort_keys=False)
+            with open(f"{DATAPATH}/running_type_menu.yaml", 'r') as file:
+                lines = [line for line in file.readlines()]
+            
+            with open(f"{DATAPATH}/running_type_menu.yaml", 'w') as file:
+                for line in lines:
+                    file.write(line.replace('null', ''))
+
+            return run_type
+
+def run_exec(command, run_type): 
+    if run_type == RUN_CLOSE:
+        command = f"start cmd /c {command}"
+
+    if run_type == RUN_STAY:
+        command = f"start cmd /k {command}"
+
+    os.system(command)
+
+    if run_type == RUN_HERE:
+        cursor.hide() # just in case the cursor was unhiden, for example by another ConsoleInterface
+        print("Program finished running.\n\nPress enter to continue.")
+        waitForEnter()
+
+
 def explore_loop(current_path="."):
     # removing quotes from path, they just get in the way
     current_path = current_path.replace('\"', '')
@@ -149,6 +205,8 @@ def explore_loop(current_path="."):
 
     console.updateList(files)
 
+    run_type = RUN_HERE
+
     while (True):
         command, curr_pos = console.interact()
 
@@ -169,16 +227,13 @@ def explore_loop(current_path="."):
                     console.updatePos(0)
 
                 else: 
-
                     if '.' not in file[1:]:
                         # file has no extension, ignoring the '.' from hidden files
                         subprocess.run(f'start notepad {current_path + NEXT_DIR + file}', capture_output=False, shell=True)
                     elif file[file.rfind('.'):] == ".py":
-                        os.system(f'start cmd /C python3 "{current_path + NEXT_DIR + file}"') # /C runs file and quits once done
-                    elif file[file.rfind('.'):] == ".exe":
-                        # os.startfile(current_path + NEXT_DIR + file) # doing it this way for .exe's
-                        os.system(f'start "New Window" "{current_path + NEXT_DIR + file}"')
-                        # subprocess.Popen(f'"{current_path + NEXT_DIR + file}"', stdout=None)
+                        console.separateInteraction(function=lambda: run_exec(f'python3 "{current_path + NEXT_DIR + file}"', run_type))
+                    elif file[file.rfind('.'):] in [".exe", ".bat", ".sh"]: 
+                        console.separateInteraction(function=lambda: run_exec(f'"{current_path + NEXT_DIR + file}"', run_type))
                     else:
                         subprocess.run(f'explorer {current_path + NEXT_DIR + file}', capture_output=False, shell=True)
 
@@ -196,6 +251,11 @@ def explore_loop(current_path="."):
 
             continue
                     
+        if command == key.CTRL_S:
+            run_type = console.separateInteraction(function=lambda: select_run_type(run_type))
+            # run_type_no = (run_type_no + 1) % len(RUN_TYPES)
+            # console.separateInteraction(message=f"Run type:\n{RUN_TYPES[run_type_no]}\n")
+
 
         # open images in paint and other files in notepad
         if command == key.CTRL_O:

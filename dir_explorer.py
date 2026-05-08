@@ -5,7 +5,6 @@ from filetype import is_image
 from readchar import key
 import subprocess
 import pyperclip
-import cursor
 import yaml
 import sys
 import os
@@ -178,8 +177,6 @@ def run_exec(command, run_type):
     os.system(command)
 
     if run_type == RUN_HERE:
-        cursor.hide() # just in case the cursor was unhiden, for example by another ConsoleInterface
-        # print("Program finished running.\n\nPress enter to continue.")
         waitForEnter()
 
 
@@ -234,9 +231,9 @@ def explore_loop(current_path="."):
                         # file has no extension, ignoring the '.' from hidden files
                         subprocess.run(f'start notepad {current_path + NEXT_DIR + file}', capture_output=False, shell=True)
                     elif file[file.rfind('.'):] == ".py":
-                        console.separateInteraction(function=lambda: run_exec(f'python3 "{current_path + NEXT_DIR + file}"', run_type), startAtTop=True)
+                        console.separateInteraction(function=lambda: run_exec(f'python3 "{current_path + NEXT_DIR + file}"', run_type),showCursor=True, startAtTop=True)
                     elif file[file.rfind('.'):] in [".exe", ".bat", ".sh"]: 
-                        console.separateInteraction(function=lambda: run_exec(f'"{current_path + NEXT_DIR + file}"', run_type), startAtTop=True)
+                        console.separateInteraction(function=lambda: run_exec(f'"{current_path + NEXT_DIR + file}"', run_type), showCursor=True, startAtTop=True)
                     else:
                         subprocess.run(f'explorer {current_path + NEXT_DIR + file}', capture_output=False, shell=True)
 

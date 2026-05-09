@@ -232,8 +232,10 @@ def explore_loop(current_path="."):
                         subprocess.run(f'start notepad {current_path + NEXT_DIR + file}', capture_output=False, shell=True)
                     elif file[file.rfind('.'):] == ".py":
                         console.separateInteraction(function=lambda: run_exec(f'python3 "{current_path + NEXT_DIR + file}"', run_type),showCursor=True, startAtTop=True)
+                        console.setTitle("Dir-Explorer")
                     elif file[file.rfind('.'):] in [".exe", ".bat", ".sh"]: 
                         console.separateInteraction(function=lambda: run_exec(f'"{current_path + NEXT_DIR + file}"', run_type), showCursor=True, startAtTop=True)
+                        console.setTitle("Dir-Explorer")
                     else:
                         subprocess.run(f'explorer {current_path + NEXT_DIR + file}', capture_output=False, shell=True)
 

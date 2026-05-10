@@ -1,0 +1,31 @@
+How do I move in the current directory?:
+    - "- arrow keys -> moving between files in the current directory."
+    - "- character  -> move cursor to the next directory / file that starts with character, if it exists."
+    - "- ctrl+f     -> search for the next directory / file that contains string, if it exists (not case sensitive)."
+    - "- '\\'        -> find next directory / file that contains last searched string."
+    - "- enter      -> for directory: open the selected directory;"
+    - "- backspace  -> return to parent directory of current directory."
+Openning files and directories:
+    - "- enter  -> for file: if '.py', '.bat', '.exe' or '.sh', attempt to run, else open in default program."
+    - "- ctrl+s -> open menu to select the running type for runnable files."
+    - "- ctrl+o -> open images in paint, python files in vs code, others in notepad."
+    - "- tab    -> open current directory in file explorer."
+    - "- '`'    -> open current directory in powershell."
+    - "- '~'    -> open current directory in another dir-explorer."
+Edit files and directories:
+    - "- ctrl+n -> create new file or directory:"
+    - "            - file w/  extension: '{filename}.{extension}';"
+    - "            - file w/o extension: '{filename}.';"
+    - "            - directory:          '{filename}'."
+    - "- ctrl+r -> rename selected directory / file (if removing extension, do '{filename}.')."
+    - "- delete -> move directory / file to recycle bin."
+    - "- ctrl+b -> open recycle bin in Windows File Explorer."
+File and directory paths:
+    - "- ctrl+t -> print the tree of the current directory."
+    - "- ctrl+p -> print the path of selected the file or directory (and save it to clipboard)."
+    - "- ctrl+d -> print the path of the current directory (and save it to clipboard)."
+Application options:
+    - "- ctrl+u  -> update list (if directory was changed outside this app or terminal window was resized)."
+    - "- '='/'-' -> increase/decrease number of characters in file and directory names before they are cut off."
+    - "- '?'     -> display current help page."
+    - "- escape  -> quit application."

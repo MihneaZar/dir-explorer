@@ -26,7 +26,7 @@ RUN_TYPES = [RUN_HERE, RUN_CLOSE, RUN_STAY]
 
 
 COMMAND_LIST = [key.ENTER, key.CTRL_S, key.CTRL_O, key.BACKSPACE, key.CTRL_T, key.CTRL_D, key.CTRL_P, key.TAB, 
-                '`', '~', key.CTRL_N, key.CTRL_R, key.DELETE, key.CTRL_B, key.CTRL_U, key.ESC]
+                '`', '~', key.CTRL_N, key.CTRL_R, key.DELETE, key.CTRL_B, key.CTRL_U, '?', key.ESC]
 HELP_PAGE    = """Console application for easier movement through directories.
 
 Controls:
@@ -55,6 +55,13 @@ Controls:
     - '='/'-'    -> increase/decrease number of characters in file and directory names before they are cut off.
     - '?'        -> display current help page.
     - escape     -> quit application.
+""" 
+
+
+HELP_PAGE    = """Console application for easier movement through directories.
+
+Controls:
+    - backspace  -> return to parent directory of current directory.
 """ 
 
 
@@ -464,6 +471,9 @@ def explore_loop(current_path="."):
             files = get_files(console, current_path)
             console.updateList(files)
             continue
+
+        if command == '?':
+            console.separateInteraction(function= lambda: MenuInterface.helpMenu(yaml.safe_load(open(f"{DATAPATH}/help_menu.yaml")), 'light_yellow', 'yellow'))
 
         # quit application
         if command == key.ESC:

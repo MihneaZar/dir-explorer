@@ -27,42 +27,6 @@ RUN_TYPES = [RUN_HERE, RUN_CLOSE, RUN_STAY]
 
 COMMAND_LIST = [key.ENTER, key.CTRL_S, key.CTRL_O, key.BACKSPACE, key.CTRL_T, key.CTRL_D, key.CTRL_P, key.TAB, 
                 '`', '~', key.CTRL_N, key.CTRL_R, key.DELETE, key.CTRL_B, key.CTRL_U, '?', key.ESC]
-HELP_PAGE    = """Console application for easier movement through directories.
-
-Controls:
-    - arrow keys -> moving between files in the current directory.
-    - character  -> move cursor to the next directory / file that starts with character, if it exists.
-    - ctrl+f     -> search for the next directory / file that contains string, if it exists (not case sensitive).
-    - '\\'        -> find next directory / file that contains last searched string.
-    - enter      -> for directory: switch to the selected directory;
-                 -> for file: if '.py', '.bat', '.exe' or '.sh' attempt to run, else open in default program.
-    - ctrl+s     -> open menu to select the running type for runnable files.
-    - ctrl+o     -> open images in paint, python files in vs code, others in notepad.
-    - backspace  -> return to parent directory of current directory.
-    - ctrl+t     -> print the tree of the current directory.
-    - ctrl+p     -> print the path of the current file (and save it to clipboard).
-    - ctrl+d     -> print the path of the current directory (and save it to clipboard).
-    - tab        -> open current directory in file explorer.
-    - '`'        -> open current directory in powershell.
-    - '~'        -> open current directory in another dir-explorer.
-    - ctrl+n     -> create file w/  extension: "{filename}.{extension}";
-                 -> create file w/o extension: "{filename}.";
-                 -> create directory:          "{filename}".
-    - ctrl+r     -> rename selected directory / file (if removing extension, do "{filename}.").
-    - delete     -> move directory / file to recycle bin.
-    - ctrl+b     -> open recycle bin in Windows File Explorer.
-    - ctrl+u     -> update list (if directory was changed outside this app or terminal window was resized).
-    - '='/'-'    -> increase/decrease number of characters in file and directory names before they are cut off.
-    - '?'        -> display current help page.
-    - escape     -> quit application.
-""" 
-
-
-HELP_PAGE    = """Console application for easier movement through directories.
-
-Controls:
-    - backspace  -> return to parent directory of current directory.
-""" 
 
 
 def get_files(console, current_path):
@@ -205,7 +169,7 @@ def explore_loop(current_path="."):
         os.chdir(current_path)
         current_path = os.getcwd()
 
-    console = ConsoleListInterface(items=[], specialCommands=COMMAND_LIST, helpPage=HELP_PAGE, printFunc=lambda filename, max_name_width: print_filename(filename, max_name_width, current_path))
+    console = ConsoleListInterface(items=[], specialCommands=COMMAND_LIST, printFunc=lambda filename, max_name_width: print_filename(filename, max_name_width, current_path))
     console.setTitle("Dir-Explorer")
 
     files = get_files(console, current_path)

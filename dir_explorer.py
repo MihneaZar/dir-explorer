@@ -104,36 +104,37 @@ def print_tree(current_path):
 
 
 def select_run_type(run_type):
-    menu = MenuInterface(yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml")))
-
+    menu = MenuInterface(yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml"))) 
+    menu.changeOptionNames([], {run_type: run_type + " (selected)"}) # adding ' (selected)' to chosen run type
     while True:
         path = menu.interactWithMenu()
 
-        # ignoring backspace 
+        # ignoring backspace to main menu
         if not path:
             continue
 
-        if path[0] in RUN_TYPES:
-            # same running type selected
-            if path[0] == run_type:
-                continue
+        path = path[0]
+        
+        # same run_type selected or exited through esc/backspace
+        if "(selected)" in path or path in [key.ESC, key.BACKSPACE]:
+            return run_type
 
-            changes = MenuInterface.selectOption(selectedOption=run_type, newSelectedOption=path[0], options=RUN_TYPES, padding=False, selectText=" (selected)")
-            menu.changeOptionNames([], changes)
+        if path in RUN_TYPES:
+            # changes = MenuInterface.selectOption(selectedOption=run_type, newSelectedOption=path, options=RUN_TYPES, padding=False, selectText=" (selected)")
+            # menu.changeOptionNames([], changes)
 
-            run_type = path[0]
-            continue
-
-        if path[0] == "Exit":
+            menu.changeOptionNames([], {run_type + " (selected)": run_type}) # removing ' (selected)' from chosen run type
+            menu.getMenuStructure()["Selected"] = path # saving newly selected run type
             yaml.safe_dump(menu.getMenuStructure(), open(f"{DATAPATH}/running_type_menu.yaml", 'w'), indent=4, sort_keys=False)
             with open(f"{DATAPATH}/running_type_menu.yaml", 'r') as file:
                 lines = [line for line in file.readlines()]
             
+            # removing 'null' since it's not needed
             with open(f"{DATAPATH}/running_type_menu.yaml", 'w') as file:
                 for line in lines:
                     file.write(line.replace('null', ''))
 
-            return run_type
+            return path # returning newly selected run type
 
 def run_exec(command, run_type): 
     if run_type == RUN_CLOSE:
@@ -176,7 +177,7 @@ def explore_loop(current_path="."):
 
     console.updateList(files)
 
-    run_type = RUN_HERE
+    run_type = yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml"))["Selected"]
 
     while (True):
         command, curr_pos = console.interact()

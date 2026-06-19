@@ -205,9 +205,16 @@ def explore_loop(current_path="."):
                     elif file[file.rfind('.'):] == ".py":
                         console.separateInteraction(function=lambda: run_exec(f'python3 "{current_path + NEXT_DIR + file}"', run_type),showCursor=True, startAtTop=True)
                         console.setTitle("Dir-Explorer")
+                        # updating files in case the other program created/deleted files
+                        files = get_files(console, current_path)
+                        console.updateList(files)
                     elif file[file.rfind('.'):] in [".exe", ".bat", ".sh"]: 
                         console.separateInteraction(function=lambda: run_exec(f'"{current_path + NEXT_DIR + file}"', run_type), showCursor=True, startAtTop=True)
                         console.setTitle("Dir-Explorer")
+                        # updating files in case the other program created/deleted files
+                        files = get_files(console, current_path)
+                        console.updateList(files)
+
                     else:
                         subprocess.run(f'explorer {current_path + NEXT_DIR + file}', capture_output=False, shell=True)
 

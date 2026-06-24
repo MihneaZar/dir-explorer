@@ -104,7 +104,9 @@ def print_tree(current_path):
 
 
 def select_run_type(run_type):
-    menu = MenuInterface(yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml"))) 
+    menu_structure = yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml"))
+    menu = MenuInterface(menu_structure) 
+    menu.updatePos(list(menu.getMenuStructure()[next(item for item in menu_structure)].keys()).index(run_type))
     menu.changeOptionNames([], {run_type: run_type + " (selected)"}) # adding ' (selected)' to chosen run type
     while True:
         path = menu.interactWithMenu()

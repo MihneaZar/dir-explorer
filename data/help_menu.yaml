@@ -5,7 +5,7 @@ How do I move in the current directory?:
     - "- '\\'        -> find next directory / file that contains last searched string."
     - "- enter      -> for directory: open the selected directory;"
     - "- backspace  -> return to parent directory of current directory."
-Openning files and directories:
+Opening files and directories:
     - "- enter  -> for file: if '.py', '.bat', '.exe' or '.sh', attempt to run, else open in default program."
     - "- ctrl+s -> open menu to select the running type for runnable files."
     - "- ctrl+o -> open images in paint, python files in vs code, others in notepad."

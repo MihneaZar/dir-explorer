@@ -29,6 +29,8 @@ RUN_TYPES = [RUN_HERE, RUN_CLOSE, RUN_STAY]
 COMMAND_LIST = [key.ENTER, key.CTRL_S, key.CTRL_O, key.BACKSPACE, key.CTRL_T, key.CTRL_D, key.CTRL_P, key.TAB, 
                 '`', '~', key.CTRL_N, key.CTRL_R, key.DELETE, key.CTRL_B, key.CTRL_U, '?', key.ESC]
 
+RUNNABLES = ["exe", "py", "ba", "sh"]
+
 
 def get_files(console, current_path):
     files  = [dir for dir in os.listdir(current_path) if os.path.isdir(current_path + NEXT_DIR + dir)]       # putting directories first 
@@ -58,6 +60,8 @@ def print_filename(filename, max_name_width, current_path):
 
     if os.path.isdir(current_path + NEXT_DIR + filename):
         return colored(name, 'yellow')
+    elif '.' in filename and filename[filename.rfind('.') + 1:] in RUNNABLES:
+        return colored(name, "cyan")
     else:
         return name
 

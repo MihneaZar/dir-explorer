@@ -96,6 +96,10 @@ def print_tree(current_path):
 
         pos = tree.find('├', pos+1)
 
+    # removing unnecessary "No subfolders exist" message
+    if "No subfolders exist" in tree:
+        tree = tree.replace("No subfolders exist", "").rstrip(" \n") + "\n\n"
+
     print(current_path[current_path.rfind(NEXT_DIR) + 1:])
     print(tree, end='')
 

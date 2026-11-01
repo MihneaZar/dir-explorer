@@ -5,6 +5,7 @@ from filetype import is_image
 from readchar import key
 import subprocess
 import pyperclip
+import cursor
 import yaml
 import sys
 import os
@@ -149,12 +150,11 @@ def run_exec(command, run_type):
     if run_type == RUN_STAY:
         command = f"start cmd /k {command}"
 
-    if run_type == RUN_HERE:
-        print("Press enter to continue once the program is finished.\nProgram running:\n")
-
     os.system(command)
 
     if run_type == RUN_HERE:
+        print(f"[{colored('Dir-Explorer', 'yellow')}] Program finished. Press enter to continue.\n")
+        cursor.hide()
         waitForEnter()
 
 

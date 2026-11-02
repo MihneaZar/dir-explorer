@@ -181,7 +181,7 @@ def explore_loop(current_path="."):
         current_path = os.getcwd()
 
     console = ConsoleListInterface(items=[], specialCommands=COMMAND_LIST, printFunc=lambda filename, max_name_width: 
-                                   print_filename(filename, max_name_width, current_path), helpColor="yellow")
+                                   print_filename(filename, max_name_width, current_path), helpSearchColor="yellow")
     console.setTitle("Dir-Explorer")
 
     files = get_files(console, current_path)

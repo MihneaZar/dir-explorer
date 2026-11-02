@@ -76,7 +76,7 @@ def print_tree(current_path):
     tree = subprocess.run(f'tree "{current_path}" /F', capture_output=True, universal_newlines=True, shell=True).stdout
 
     if tree.count('\n') > 9000:
-        raise Exception("Directory tree too large to display")
+        raise Exception(colored("Directory tree too large to display.", "yellow"))
 
     
     # ignoring first three lines of output
@@ -253,7 +253,7 @@ def explore_loop(current_path="."):
             file = files[curr_pos]
             if os.path.isdir(current_path + NEXT_DIR + file):
                 
-                console.separateInteraction(message=f'\nThis is a directory.\n')
+                console.separateInteraction(message=colored(f'\nThis is a directory.\n', 'yellow'))
 
                 continue
 
@@ -306,12 +306,12 @@ def explore_loop(current_path="."):
                 e = str(e)
 
                 if "WinError" in e:
-                    e = e[e.find("]")+2:e.find(":")]
+                    e = e[e.find("]")+2:e.find(":")] + '.'
 
                 else:
-                    e = "Directory tree too large to display"
+                    e = colored("Directory tree too large to display.", "yellow")
 
-                console.separateInteraction(message=f'\n{e}.\n')
+                console.separateInteraction(message=f'\n{e}\n')
 
             if current_path == '{HOMEDRIVE}\\':
                 os.system(f'title Local Disk ({HOMEDRIVE}) - Explore')
@@ -324,13 +324,13 @@ def explore_loop(current_path="."):
         # print path to selected file and copy it to clipboard
         if command == key.CTRL_P:
             file = files[curr_pos] 
-            console.separateInteraction(message=f'Path to selected file copied to clipboard:\n{(current_path + NEXT_DIR + file).replace(NEXT_DIR, "/")}\n')
+            console.separateInteraction(message=f'{colored("Path to selected directory/file copied to clipboard", "yellow")}:\n{colored((current_path + NEXT_DIR + file).replace(NEXT_DIR, "/"), "light_yellow")}\n')
             pyperclip.copy((current_path + NEXT_DIR + file).replace(NEXT_DIR, "/"))
             continue
 
         # print path to current directory and copy it to clipboard
         if command == key.CTRL_D:
-            console.separateInteraction(message=f'Path to current directory copied to clipboard:\n{current_path.replace(NEXT_DIR, "/")}\n')
+            console.separateInteraction(message=f'{colored("Path to current directory copied to clipboard", "yellow")}:\n{colored(current_path.replace(NEXT_DIR, "/"), "light_yellow")}\n')
             pyperclip.copy(current_path.replace(NEXT_DIR, "/"))
             continue 
 
@@ -354,7 +354,7 @@ def explore_loop(current_path="."):
         # creating directory/file
         if command == key.CTRL_N:
             
-            filename = console.separateInteraction(function=lambda: input("Type name for new directory/file:\n"), showCursor=True)
+            filename = console.separateInteraction(function=lambda: input(f'{colored("Type name for new directory/file:", "yellow")}\n'), showCursor=True)
 
             if filename and not filename.isspace():
                 try:
@@ -389,7 +389,7 @@ def explore_loop(current_path="."):
         # rename directory/file
         if command == key.CTRL_R:
             file = files[curr_pos]
-            filename = console.separateInteraction(function=lambda: input(f"Rename '{file}' to:\n"), showCursor=True)
+            filename = console.separateInteraction(function=lambda: input(f"{colored('Rename', 'yellow')} {file} {colored('to', 'yellow')}:\n"), showCursor=True)
 
             if filename and not filename.isspace():
                 try:

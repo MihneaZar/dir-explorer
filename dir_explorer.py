@@ -180,7 +180,8 @@ def explore_loop(current_path="."):
         os.chdir(current_path)
         current_path = os.getcwd()
 
-    console = ConsoleListInterface(items=[], specialCommands=COMMAND_LIST, printFunc=lambda filename, max_name_width: print_filename(filename, max_name_width, current_path))
+    console = ConsoleListInterface(items=[], specialCommands=COMMAND_LIST, printFunc=lambda filename, max_name_width: 
+                                   print_filename(filename, max_name_width, current_path), helpColor="yellow")
     console.setTitle("Dir-Explorer")
 
     files = get_files(console, current_path)
@@ -324,13 +325,13 @@ def explore_loop(current_path="."):
         # print path to selected file and copy it to clipboard
         if command == key.CTRL_P:
             file = files[curr_pos] 
-            console.separateInteraction(message=f'{colored("Path to selected directory/file copied to clipboard", "yellow")}:\n{colored((current_path + NEXT_DIR + file).replace(NEXT_DIR, "/"), "light_yellow")}\n')
+            console.separateInteraction(message=f'{colored("Path to selected directory/file copied to clipboard:", "yellow")}\n{colored((current_path + NEXT_DIR + file).replace(NEXT_DIR, "/"), "light_yellow")}\n')
             pyperclip.copy((current_path + NEXT_DIR + file).replace(NEXT_DIR, "/"))
             continue
 
         # print path to current directory and copy it to clipboard
         if command == key.CTRL_D:
-            console.separateInteraction(message=f'{colored("Path to current directory copied to clipboard", "yellow")}:\n{colored(current_path.replace(NEXT_DIR, "/"), "light_yellow")}\n')
+            console.separateInteraction(message=f'{colored("Path to current directory copied to clipboard:", "yellow")}\n{colored(current_path.replace(NEXT_DIR, "/"), "light_yellow")}\n')
             pyperclip.copy(current_path.replace(NEXT_DIR, "/"))
             continue 
 
@@ -389,7 +390,7 @@ def explore_loop(current_path="."):
         # rename directory/file
         if command == key.CTRL_R:
             file = files[curr_pos]
-            filename = console.separateInteraction(function=lambda: input(f"{colored('Rename', 'yellow')} {file} {colored('to', 'yellow')}:\n"), showCursor=True)
+            filename = console.separateInteraction(function=lambda: input(f"{colored('Rename', 'yellow')} {colored(file, 'light_yellow')} {colored('to:', 'yellow')}\n"), showCursor=True)
 
             if filename and not filename.isspace():
                 try:

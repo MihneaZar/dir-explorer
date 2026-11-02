@@ -1,4 +1,4 @@
-from ConsoleListInterface import ConsoleListInterface, MenuInterface, waitForEnter
+from ConsoleListInterface import ConsoleListInterface, MenuInterface, waitForEnter, autocomplete
 from send2trash import send2trash
 from termcolor import colored
 from filetype import is_image
@@ -390,7 +390,7 @@ def explore_loop(current_path="."):
         # rename directory/file
         if command == key.CTRL_R:
             file = files[curr_pos]
-            filename = console.separateInteraction(function=lambda: input(f"{colored('Rename', 'yellow')} {colored(file, 'light_yellow')} {colored('to:', 'yellow')}\n"), showCursor=True)
+            filename = console.separateInteraction(function=lambda: autocomplete([file], f"{colored('Rename', 'yellow')} {colored(file, 'light_yellow')} {colored('to:', 'yellow')}\n"), showCursor=True)
 
             if filename and not filename.isspace():
                 try:

@@ -10,6 +10,10 @@ import yaml
 import sys
 import os
 
+# only import this module for windows (for reading lnk files)
+if os.name == 'nt':
+    from win32com.client import Dispatch
+
 
 HOMEPATH = os.path.dirname(os.path.realpath(__file__))
 DATAPATH = f"{HOMEPATH}/data"
@@ -46,6 +50,26 @@ def get_files(console, current_path):
     return files
 
 
+DIR   = "dir"
+EXE   = "exe"
+OTHER = "other"
+def get_file_type(filename, current_path):
+    # changing links to the target directory/file
+    # if filename[filename.rfind('.') + 1:] == "lnk" and os.name == 'nt':
+    #     shell = Dispatch("WScript.Shell")
+    #     shortcut = shell.CreateShortCut(current_path + NEXT_DIR + filename)
+    #     filepath = shortcut.TargetPath
+    # else:
+    filepath = current_path + NEXT_DIR + filename
+
+    if os.path.isdir(filepath) or filepath == "":
+        return DIR
+    elif '.' in filepath and filepath[filepath.rfind('.') + 1:] in RUNNABLES:
+        return EXE
+    else:
+        return OTHER
+
+
 def print_filename(filename, max_name_width, current_path):
     name = filename
     if max_name_width <= len(name):
@@ -56,14 +80,8 @@ def print_filename(filename, max_name_width, current_path):
             extension = ''
         name = name[0:max(max_name_width - 1 - len(extension), 0)] + '-' + extension 
 
-    # return current_path[current_path.rfind('\\') + 1:]# + ' ' + name
-
-    if os.path.isdir(current_path + NEXT_DIR + filename):
-        return colored(name, 'yellow')
-    elif '.' in filename and filename[filename.rfind('.') + 1:] in RUNNABLES:
-        return colored(name, "cyan")
-    else:
-        return name
+    file_type = get_file_type(filename, current_path)
+    return colored(name, 'yellow') if file_type == DIR else colored(name, "cyan") if file_type == EXE else name
 
 
 def print_tree(current_path):
@@ -341,17 +359,19 @@ def explore_loop(current_path="."):
 
         # open in file explorer
         if command == key.TAB:
-            os.startfile(current_path) # open the C:\Windows directory
+            os.startfile(current_path) 
             continue
 
         # open in powershell
         if command == '`':
-            os.startfile("powershell.exe") # open powershell in Windows
+            # only open powershell if windows
+            if os.name == 'nt':
+                os.startfile("powershell.exe") # open powershell in Windows
             continue
 
         # open additional Dir-Explorer in current directory
         if command == "~":
-            os.startfile("explore")
+            os.system(f'start cmd /c python3 "{HOMEPATH}{NEXT_DIR}dir_explorer.py"')
             continue
 
 

@@ -37,9 +37,10 @@ RUNNABLES = ["exe", "py", "ba", "sh"]
 
 
 def get_files(console, current_path):
-    files  = [dir for dir in os.listdir(current_path) if os.path.isdir(current_path + NEXT_DIR + dir)]       # putting directories first 
-    files += [file for file in os.listdir(current_path) if not os.path.isdir(current_path + NEXT_DIR + file) # then files
-                                                           and file[file.find('.') + 1:] != "ini"]           # that aren't the .ini Windows file for dirs
+    files  = [dir for dir in os.listdir(current_path) if get_file_type(dir, current_path) == DIR]     # putting directories first 
+    files += [exe for exe in os.listdir(current_path) if get_file_type(exe, current_path) == EXE]     # then runnable files
+    files += [file for file in os.listdir(current_path) if get_file_type(file, current_path) == OTHER # then all other files
+                                                           and file[file.find('.') + 1:] != "ini"]    # that aren't the .ini Windows file for dirs
     
     if current_path == f'{HOMEDRIVE}\\':
         console.setTopText(colored(f'{HOMEDRIVE.replace(":", "")}:\n', 'light_yellow'))
@@ -55,14 +56,14 @@ EXE   = "exe"
 OTHER = "other"
 def get_file_type(filename, current_path):
     # changing links to the target directory/file
-    # if filename[filename.rfind('.') + 1:] == "lnk" and os.name == 'nt':
-    #     shell = Dispatch("WScript.Shell")
-    #     shortcut = shell.CreateShortCut(current_path + NEXT_DIR + filename)
-    #     filepath = shortcut.TargetPath
-    # else:
-    filepath = current_path + NEXT_DIR + filename
+    if filename[filename.rfind('.') + 1:] == "lnk" and os.name == 'nt':
+        shell = Dispatch("WScript.Shell")
+        shortcut = shell.CreateShortCut(current_path + NEXT_DIR + filename)
+        filepath = shortcut.TargetPath
+    else:
+        filepath = current_path + NEXT_DIR + filename
 
-    if os.path.isdir(filepath) or filepath == "":
+    if os.path.isdir(filepath):
         return DIR
     elif '.' in filepath and filepath[filepath.rfind('.') + 1:] in RUNNABLES:
         return EXE
@@ -220,9 +221,18 @@ def explore_loop(current_path="."):
 
             try:
                 file = files[curr_pos]
-                if os.path.isdir(current_path + NEXT_DIR + file):
-                    current_path += NEXT_DIR + file if current_path != f'{HOMEDRIVE}\\' else file
-                    changed_directory = True
+                if get_file_type(file, current_path) == DIR:
+                    # checking if it is a simple directory
+                    if os.path.isdir(current_path + NEXT_DIR + file):
+                        current_path += NEXT_DIR + file if current_path != f'{HOMEDRIVE}\\' else file
+                        changed_directory = True
+                    # checking if window just in case
+                    elif os.name == 'nt':
+                        shell = Dispatch("WScript.Shell")
+                        shortcut = shell.CreateShortCut(current_path + NEXT_DIR + file)
+                        current_path = shortcut.TargetPath
+                    else: 
+                        continue
                     
                     files = get_files(console, current_path)
                     os.chdir(current_path) # changing working directory to current one
@@ -413,7 +423,8 @@ def explore_loop(current_path="."):
         # rename directory/file
         if command == key.CTRL_R:
             file = files[curr_pos]
-            color = 'light_yellow' if os.path.isdir(current_path + NEXT_DIR + file) else 'cyan' if '.' in file and file[file.rfind('.') + 1:] in RUNNABLES else 'light_grey'
+            file_type = get_file_type(file, current_path)
+            color = 'light_yellow' if file_type == DIR else 'cyan' if file_type == EXE else 'light_grey'
             
             filename = console.separateInteraction(function=lambda: autocomplete([file], f"{colored('Rename', 'yellow')} {colored(file, color)} {colored('to:', 'yellow')}\n"), showCursor=True)
 

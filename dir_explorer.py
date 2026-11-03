@@ -390,7 +390,9 @@ def explore_loop(current_path="."):
         # rename directory/file
         if command == key.CTRL_R:
             file = files[curr_pos]
-            filename = console.separateInteraction(function=lambda: autocomplete([file], f"{colored('Rename', 'yellow')} {colored(file, 'light_yellow')} {colored('to:', 'yellow')}\n"), showCursor=True)
+            color = 'light_yellow' if os.path.isdir(current_path + NEXT_DIR + file) else 'cyan' if '.' in file and file[file.rfind('.') + 1:] in RUNNABLES else 'light_grey'
+            
+            filename = console.separateInteraction(function=lambda: autocomplete([file], f"{colored('Rename', 'yellow')} {colored(file, color)} {colored('to:', 'yellow')}\n"), showCursor=True)
 
             if filename and not filename.isspace():
                 try:

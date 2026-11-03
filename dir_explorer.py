@@ -180,6 +180,9 @@ def explore_loop(current_path="."):
         os.chdir(current_path)
         current_path = os.getcwd()
 
+    # set working directory to current_path, in case it's been given as command-line argument 
+    os.chdir(current_path)
+
     console = ConsoleListInterface(items=[], specialCommands=COMMAND_LIST, printFunc=lambda filename, max_name_width: 
                                    print_filename(filename, max_name_width, current_path), helpSearchColor="yellow")
     console.setTitle("Dir-Explorer")
@@ -447,7 +450,9 @@ def explore_loop(current_path="."):
 
         # open recycle bin in windows file explorer
         if command == key.CTRL_B:
-            subprocess.run("explorer shell:RecycleBinFolder")
+            # only try to open if windows
+            if os.name=='nt':
+                subprocess.run("explorer shell:RecycleBinFolder")
             continue
 
             

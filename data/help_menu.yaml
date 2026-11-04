@@ -1,7 +1,9 @@
 How do I move in the current directory?:
     - "    - arrow keys -> moving between files in the current directory."
     - "    - character  -> move cursor to the next directory / file that starts with character, if it exists."
-    - "    - ctrl+f     -> search for the next directory / file that contains string, if it exists (not case sensitive)."
+    - "    - ctrl+f     -> search for the next directory / file that contains string, if it exists (not case sensitive);"
+    - "                 -> while typing the search string, tab will autocomplete the highlighted match;"
+    - "                 -> also, up/down arrows will cycle through all filenames that match the typed string."
     - "    - '\\'        -> find next directory / file that contains last searched string."
     - "    - enter      -> open directory (highlighted yellow) in current dir-explorer."
     - "    - backspace  -> return to parent directory of current directory."

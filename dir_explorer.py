@@ -215,6 +215,17 @@ def explore_loop(current_path="."):
     while (True):
         command, curr_pos = console.interact()
 
+        # shield check for all commands related to current position
+        # in case directory contents have been changed outside this dir-explorer
+        if command in [key.ENTER, key.CTRL_O, key.CTRL_P, key.CTRL_R, key.DELETE]:
+            check_files = get_files(console, current_path)
+            if check_files != files:
+                console.separateInteraction(message=colored("Directory contents have been changed outside this Dir-Explorer.\nDir-Explorer has updated the list automatically.\n", "yellow"))
+
+                files = check_files
+                console.updateList(files)
+                continue
+
         # go to selected directory / open file in default app (or "select app" prompt)
         if command == key.ENTER:
             changed_directory = False
@@ -269,8 +280,11 @@ def explore_loop(current_path="."):
 
                 if "WinError" in e:
                     e = e[e.find("]")+2:e.find(":")]
+                    
+                if e[-1] != '.':
+                    e.append('.')
 
-                console.separateInteraction(message=f'\n{e}.\n')
+                console.separateInteraction(message=f'\n{e}\n')
 
             continue
                     
@@ -307,7 +321,10 @@ def explore_loop(current_path="."):
                 if "WinError" in e:
                     e = e[e.find("]")+2:e.find(":")]
 
-                console.separateInteraction(message=f'\n{e}.\n')
+                if e[-1] != '.':
+                    e.append('.')
+
+                console.separateInteraction(message=f'\n{e}\n')
 
             continue
 
@@ -338,7 +355,10 @@ def explore_loop(current_path="."):
                 e = str(e)
 
                 if "WinError" in e:
-                    e = e[e.find("]")+2:e.find(":")] + '.'
+                    e = e[e.find("]")+2:e.find(":")]
+                    
+                if e[-1] != '.':
+                    e.append('.')
 
                 else:
                     e = colored("Directory tree too large to display.", "yellow")
@@ -387,7 +407,6 @@ def explore_loop(current_path="."):
 
         # creating directory/file
         if command == key.CTRL_N:
-            
             filename = console.separateInteraction(function=lambda: input(f'{colored("Type name for new directory/file:", "yellow")}\n'), showCursor=True)
 
             if filename and not filename.isspace():
@@ -415,8 +434,11 @@ def explore_loop(current_path="."):
 
                     if "WinError" in e:
                         e = e[e.find("]")+2:e.find(":")]
+                        
+                    if e[-1] != '.':
+                        e.append('.')
 
-                    console.separateInteraction(message=f'\n{e}.\n')
+                    console.separateInteraction(message=f'\n{e}\n')
 
             continue
 
@@ -448,8 +470,11 @@ def explore_loop(current_path="."):
 
                     if "WinError" in e:
                         e = e[e.find("]")+2:e.find(":")]
+                        
+                    if e[-1] != '.':
+                        e.append('.')
 
-                    console.separateInteraction(message=f'\n{e}.\n')
+                    console.separateInteraction(message=f'\n{e}\n')
 
             continue
 
@@ -474,8 +499,11 @@ def explore_loop(current_path="."):
 
                 if "WinError" in e:
                     e = e[e.find("]")+2:e.find(":")]
+                    
+                if e[-1] != '.':
+                    e.append('.')
 
-                console.separateInteraction(message=f'\n{e}.\n')
+                console.separateInteraction(message=f'\n{e}\n')
 
             continue
 

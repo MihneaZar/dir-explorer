@@ -23,6 +23,10 @@ Edit files and directories:
     - "                - file w/o extension: '{filename}.';"
     - "                - directory:          '{filename}'."
     - "    - ctrl+r -> rename selected directory / file (to remove file extension, type '{filename}.')."
+    - "    - ctrl+c -> set or unset file to be copied."
+    - "    - ctrl+x -> set or unset directory / file to be moved."
+    - "    - insert -> copy and move all directories and files to current directory."
+    - "    - ctrl+z -> clear all directories and files set to be copied and moved."
     - "    - delete -> move directory / file to recycle bin."
     - "    - ctrl+b -> open recycle bin in Windows File Explorer."
 File and directory paths:

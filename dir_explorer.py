@@ -5,6 +5,7 @@ from filetype import is_image
 from readchar import key
 import subprocess
 import pyperclip
+import shutil
 import cursor
 import yaml
 import sys
@@ -30,30 +31,17 @@ RUN_STAY  = "Run in another tab and keep it open once finished"
 RUN_TYPES = [RUN_HERE, RUN_CLOSE, RUN_STAY]
 
 
-COMMAND_LIST = [key.ENTER, key.CTRL_S, key.CTRL_O, key.BACKSPACE, key.CTRL_T, key.CTRL_D, key.CTRL_P, key.TAB, 
-                '`', '~', key.CTRL_N, key.CTRL_R, key.DELETE, key.CTRL_B, key.CTRL_U, '?', key.ESC]
+COMMAND_LIST = [key.ENTER, key.CTRL_S, key.CTRL_O, key.BACKSPACE, key.CTRL_T, key.CTRL_D, key.CTRL_P, key.TAB, '`', '~', 
+                key.CTRL_N, key.CTRL_R, key.CTRL_C, key.CTRL_X, key.INSERT, key.CTRL_Z, key.DELETE, key.CTRL_B, key.CTRL_U, '?', key.ESC]
 
 RUNNABLES = ["exe", "py", "ba", "sh"]
-
-
-def get_files(console, current_path):
-    files  = [dir for dir in os.listdir(current_path) if get_file_type(dir, current_path) == DIR]     # putting directories first 
-    files += [exe for exe in os.listdir(current_path) if get_file_type(exe, current_path) == EXE]     # then runnable files
-    files += [file for file in os.listdir(current_path) if get_file_type(file, current_path) == OTHER # then all other files
-                                                           and file[file.find('.') + 1:] != "ini"]    # that aren't the .ini Windows file for dirs
-    
-    if current_path == f'{HOMEDRIVE}\\':
-        console.setTopText(colored(f'{HOMEDRIVE.replace(":", "")}:\n', 'light_yellow'))
-            
-    else:  
-        console.setTopText(colored(f'{current_path}:\n', 'light_yellow'))
-
-    return files
-
 
 DIR   = "dir"
 EXE   = "exe"
 OTHER = "other"
+
+
+
 def get_file_type(filename, current_path):
     # changing links to the target directory/file
     if filename[filename.rfind('.') + 1:] == "lnk" and os.name == 'nt':
@@ -70,6 +58,40 @@ def get_file_type(filename, current_path):
     else:
         return OTHER
 
+def get_file_color(filename, current_path, use_light_yellow=False):
+    file_type = get_file_type(filename, current_path)
+
+    if file_type == DIR:
+        return "light_yellow" if use_light_yellow else "yellow"
+    elif file_type == EXE:
+        return "cyan"
+    else:
+        return "light_grey"
+
+def get_move_copy_name(path):
+    filename  = path[path.rfind(NEXT_DIR) + 1:]
+    filepath  = path[:path.rfind(NEXT_DIR)]
+    return colored(filename, get_file_color(filename, filepath, use_light_yellow=True))
+
+
+def set_top_text(console, current_path):
+    top_text = colored(f'{HOMEDRIVE.replace(":", "")}\n', 'light_yellow') if current_path == f'{HOMEDRIVE}\\' else colored(f'{current_path}\n', 'light_yellow')
+    top_text += f"{colored('Copy', 'yellow')}: {', '.join(get_move_copy_name(copy) for copy in console.copy)}\n" if console.copy else ""
+    top_text += f"{colored('Move', 'yellow')}: {', '.join(get_move_copy_name(move) for move in console.move)}\n" if console.move else ""
+        
+    console.setTopText(top_text)
+
+
+def get_files(console, current_path):
+    files  = [dir for dir in os.listdir(current_path) if get_file_type(dir, current_path) == DIR]     # putting directories first 
+    files += [exe for exe in os.listdir(current_path) if get_file_type(exe, current_path) == EXE]     # then runnable files
+    files += [file for file in os.listdir(current_path) if get_file_type(file, current_path) == OTHER # then all other files
+                                                           and file[file.find('.') + 1:] != "ini"]    # that aren't the .ini Windows file for dirs
+
+    set_top_text(console, current_path)
+
+    return files
+
 
 def print_filename(filename, max_name_width, current_path):
     name = filename
@@ -81,8 +103,7 @@ def print_filename(filename, max_name_width, current_path):
             extension = ''
         name = name[0:max(max_name_width - 1 - len(extension), 0)] + '-' + extension 
 
-    file_type = get_file_type(filename, current_path)
-    return colored(name, 'yellow') if file_type == DIR else colored(name, "cyan") if file_type == EXE else name
+    return colored(name, get_file_color(filename, current_path))
 
 
 def print_tree(current_path):
@@ -206,8 +227,10 @@ def explore_loop(current_path="."):
                                    print_filename(filename, max_name_width, current_path), helpSearchColor="yellow")
     console.setTitle("Dir-Explorer")
 
-    files = get_files(console, current_path)
+    console.copy = []
+    console.move = []
 
+    files = get_files(console, current_path)
     console.updateList(files)
 
     run_type = yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml"))["Selected"]
@@ -217,7 +240,7 @@ def explore_loop(current_path="."):
 
         # shield check for all commands related to current position
         # in case directory contents have been changed outside this dir-explorer
-        if command in [key.ENTER, key.CTRL_O, key.CTRL_P, key.CTRL_R, key.DELETE]:
+        if command in [key.ENTER, key.CTRL_O, key.CTRL_P, key.CTRL_R, key.CTRL_C, key.CTRL_X, key.DELETE]:
             check_files = get_files(console, current_path)
             if check_files != files:
                 console.separateInteraction(message=colored("Directory contents have been changed outside this Dir-Explorer.\nDir-Explorer has updated the list automatically.\n", "yellow"))
@@ -225,6 +248,11 @@ def explore_loop(current_path="."):
                 files = check_files
                 console.updateList(files)
                 continue
+
+
+        # select run type
+        if command == key.CTRL_S:
+            run_type = console.separateInteraction(function=lambda: select_run_type(run_type))
 
         # go to selected directory / open file in default app (or "select app" prompt)
         if command == key.ENTER:
@@ -237,7 +265,7 @@ def explore_loop(current_path="."):
                     if os.path.isdir(current_path + NEXT_DIR + file):
                         current_path += NEXT_DIR + file if current_path != f'{HOMEDRIVE}\\' else file
                         changed_directory = True
-                    # checking if window just in case
+                    # checking if windows just in case
                     elif os.name == 'nt':
                         shell = Dispatch("WScript.Shell")
                         shortcut = shell.CreateShortCut(current_path + NEXT_DIR + file)
@@ -282,17 +310,11 @@ def explore_loop(current_path="."):
                     e = e[e.find("]")+2:e.find(":")]
                     
                 if e[-1] != '.':
-                    e.append('.')
+                    e += '.'
 
                 console.separateInteraction(message=f'\n{e}\n')
 
             continue
-                    
-        if command == key.CTRL_S:
-            run_type = console.separateInteraction(function=lambda: select_run_type(run_type))
-            # run_type_no = (run_type_no + 1) % len(RUN_TYPES)
-            # console.separateInteraction(message=f"Run type:\n{RUN_TYPES[run_type_no]}\n")
-
 
         # open images in paint and other files in notepad
         if command == key.CTRL_O:
@@ -322,7 +344,7 @@ def explore_loop(current_path="."):
                     e = e[e.find("]")+2:e.find(":")]
 
                 if e[-1] != '.':
-                    e.append('.')
+                    e += '.'
 
                 console.separateInteraction(message=f'\n{e}\n')
 
@@ -358,7 +380,7 @@ def explore_loop(current_path="."):
                     e = e[e.find("]")+2:e.find(":")]
                     
                 if e[-1] != '.':
-                    e.append('.')
+                    e += '.'
 
                 else:
                     e = colored("Directory tree too large to display.", "yellow")
@@ -436,7 +458,7 @@ def explore_loop(current_path="."):
                         e = e[e.find("]")+2:e.find(":")]
                         
                     if e[-1] != '.':
-                        e.append('.')
+                        e += '.'
 
                     console.separateInteraction(message=f'\n{e}\n')
 
@@ -446,7 +468,7 @@ def explore_loop(current_path="."):
         if command == key.CTRL_R:
             file = files[curr_pos]
             file_type = get_file_type(file, current_path)
-            color = 'light_yellow' if file_type == DIR else 'cyan' if file_type == EXE else 'light_grey'
+            color = get_file_color(file, current_path, use_light_yellow=True)
             
             filename = console.separateInteraction(function=lambda: autocomplete([file], f"{colored('Rename', 'yellow')} {colored(file, color)} {colored('to:', 'yellow')}\n", exitOnEsc=True), showCursor=True)
 
@@ -472,11 +494,97 @@ def explore_loop(current_path="."):
                         e = e[e.find("]")+2:e.find(":")]
                         
                     if e[-1] != '.':
-                        e.append('.')
+                        e += '.'
 
                     console.separateInteraction(message=f'\n{e}\n')
 
             continue
+
+        # set/unset directory/file to be copied
+        if command == key.CTRL_C:
+            filepath = current_path + NEXT_DIR + files[curr_pos]
+
+            # not allowing directories to be copied, since that may overwhelm program memory
+            if os.path.isdir(filepath):
+                continue
+            
+            if filepath in console.copy:
+                console.copy.remove(filepath)
+
+            else:
+                if filepath in console.move:
+                    console.move.remove(filepath)
+
+                console.copy += [filepath]
+                            
+            set_top_text(console, current_path)
+
+        # set/unset directory/file to be moved
+        if command == key.CTRL_X:
+            filepath = current_path + NEXT_DIR + files[curr_pos]
+            
+            if filepath in console.move:
+                console.move.remove(filepath)
+
+            else:
+                if filepath in console.copy:
+                    console.copy.remove(filepath)
+
+                console.move += [filepath]
+
+            set_top_text(console, current_path)
+
+        # copying and moving directories and files
+        if command == key.INSERT:
+            for copy in console.copy:
+                try:
+                    shutil.copy(copy, current_path)
+
+                except Exception as e:
+                    e = str(e)
+                
+                    if "WinError" in e:
+                        e = e[e.find("]")+2:e.find(":")]
+                                    
+                    if e[-1] != '.':
+                        e += '.'
+                
+                    console.separateInteraction(message=f'\n{e}\n')
+
+            for move in console.move:
+                try:
+                    shutil.move(move, current_path)
+
+                except Exception as e:
+                    e = str(e)
+                
+                    if "WinError" in e:
+                        e = e[e.find("]")+2:e.find(":")]
+                                    
+                    if e[-1] != '.':
+                        e += '.'
+                
+                    console.separateInteraction(message=f'\n{e}\n')
+
+            changed = console.copy or console.move
+
+            console.copy = []
+            console.move = []
+
+            if changed:
+                files = get_files(console, current_path)
+                console.updateList(files)
+
+        # clear all directories and files set to be copied and to be moved
+        if command == key.CTRL_Z:
+
+            changed = console.copy or console.move
+
+            console.copy = []
+            console.move = []
+
+            if changed:
+                set_top_text(console, current_path)
 
         # move directory/file to recycle bin
         if command == key.DELETE:
@@ -501,7 +609,7 @@ def explore_loop(current_path="."):
                     e = e[e.find("]")+2:e.find(":")]
                     
                 if e[-1] != '.':
-                    e.append('.')
+                    e += '.'
 
                 console.separateInteraction(message=f'\n{e}\n')
 

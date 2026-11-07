@@ -448,7 +448,7 @@ def explore_loop(current_path="."):
             file_type = get_file_type(file, current_path)
             color = 'light_yellow' if file_type == DIR else 'cyan' if file_type == EXE else 'light_grey'
             
-            filename = console.separateInteraction(function=lambda: autocomplete([file], f"{colored('Rename', 'yellow')} {colored(file, color)} {colored('to:', 'yellow')}\n"), showCursor=True)
+            filename = console.separateInteraction(function=lambda: autocomplete([file], f"{colored('Rename', 'yellow')} {colored(file, color)} {colored('to:', 'yellow')}\n", exitOnEsc=True), showCursor=True)
 
             if filename and not filename.isspace():
                 try:

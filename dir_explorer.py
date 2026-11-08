@@ -78,7 +78,7 @@ def set_top_text(console, current_path):
     top_text = colored(f'{HOMEDRIVE}\n', 'light_yellow') if current_path == f'{HOMEDRIVE}\\' else colored(f'{current_path}\n', 'light_yellow')
     top_text += f"{colored('Copy', 'yellow')}: {', '.join(get_move_copy_name(copy) for copy in console.copy)}\n" if console.copy else ""
     top_text += f"{colored('Move', 'yellow')}: {', '.join(get_move_copy_name(move) for move in console.move)}\n" if console.move else ""
-        
+
     console.setTopText(top_text)
 
 
@@ -253,6 +253,8 @@ def explore_loop(current_path="."):
         # select run type
         if command == key.CTRL_S:
             run_type = console.separateInteraction(function=lambda: select_run_type(run_type))
+
+            continue
 
         # go to selected directory / open file in default app (or "select app" prompt)
         if command == key.ENTER:
@@ -467,7 +469,6 @@ def explore_loop(current_path="."):
         # rename directory/file
         if command == key.CTRL_R:
             file = files[curr_pos]
-            file_type = get_file_type(file, current_path)
             color = get_file_color(file, current_path, use_light_yellow=True)
             
             filename = console.separateInteraction(function=lambda: autocomplete([file], f"{colored('Rename', 'yellow')} {colored(file, color)} {colored('to:', 'yellow')}\n", exitOnEsc=True), showCursor=True)
@@ -515,6 +516,8 @@ def explore_loop(current_path="."):
                             
             set_top_text(console, current_path)
 
+            continue
+
         # set/unset directory/file to be moved
         if command == key.CTRL_X:
             filepath = current_path + NEXT_DIR + files[curr_pos]
@@ -529,6 +532,8 @@ def explore_loop(current_path="."):
                 console.move += [filepath]
 
             set_top_text(console, current_path)
+
+            continue
 
         # copying and moving directories and files
         if command == key.INSERT:
@@ -574,6 +579,8 @@ def explore_loop(current_path="."):
                 files = get_files(console, current_path)
                 console.updateList(files)
 
+            continue
+
         # clear all directories and files set to be copied and to be moved
         if command == key.CTRL_Z:
             changed = console.copy or console.move
@@ -583,6 +590,8 @@ def explore_loop(current_path="."):
 
             if changed:
                 set_top_text(console, current_path)
+
+            continue
 
         # move directory/file to recycle bin
         if command == key.DELETE:
@@ -618,6 +627,7 @@ def explore_loop(current_path="."):
             # only try to open if windows
             if os.name=='nt':
                 subprocess.run("explorer shell:RecycleBinFolder")
+
             continue
 
             

@@ -1,4 +1,5 @@
 from ConsoleListInterface import ConsoleListInterface, MenuInterface, waitForEnter, autocomplete
+from multiprocess import Process # for timeout on copy and delete
 from send2trash import send2trash
 from termcolor import colored
 from filetype import is_image
@@ -75,7 +76,7 @@ def get_move_copy_name(path):
 
 
 def set_top_text(console, current_path):
-    top_text = colored(f'{HOMEDRIVE.replace(":", "")}\n', 'light_yellow') if current_path == f'{HOMEDRIVE}\\' else colored(f'{current_path}\n', 'light_yellow')
+    top_text = colored(f'{HOMEDRIVE}\n', 'light_yellow') if current_path == f'{HOMEDRIVE}\\' else colored(f'{current_path}\n', 'light_yellow')
     top_text += f"{colored('Copy', 'yellow')}: {', '.join(get_move_copy_name(copy) for copy in console.copy)}\n" if console.copy else ""
     top_text += f"{colored('Move', 'yellow')}: {', '.join(get_move_copy_name(move) for move in console.move)}\n" if console.move else ""
         
@@ -505,8 +506,8 @@ def explore_loop(current_path="."):
             filepath = current_path + NEXT_DIR + files[curr_pos]
 
             # not allowing directories to be copied, since that may overwhelm program memory
-            if os.path.isdir(filepath):
-                continue
+            # if os.path.isdir(filepath):
+            #     continue
             
             if filepath in console.copy:
                 console.copy.remove(filepath)
@@ -538,7 +539,19 @@ def explore_loop(current_path="."):
         if command == key.INSERT:
             for copy in console.copy:
                 try:
-                    shutil.copy(copy, current_path)
+                    if os.path.isdir(copy):
+                        copy_process = Process(target=lambda: shutil.copytree(copy, current_path + NEXT_DIR + copy[copy.rfind(NEXT_DIR) + 1:], dirs_exist_ok=True))
+                    else:
+                        copy_process = Process(target=lambda: shutil.copy(copy, current_path))
+
+                    copy_process.start()
+                    copy_process.join(5)
+
+                    if copy_process.is_alive():
+                        copy_process.terminate()
+                        copy_process.join()
+
+                        console.separateInteraction(message=get_move_copy_name(copy) + colored(' is too large to copy.\n', 'yellow'))
 
                 except Exception as e:
                     e = str(e)

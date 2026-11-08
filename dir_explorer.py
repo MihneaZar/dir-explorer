@@ -1,6 +1,5 @@
 from ConsoleListInterface import ConsoleListInterface, MenuInterface, waitForEnter, autocomplete
 from send2trash import send2trash
-from multiprocess import Process # for timeout on copy and delete
 from termcolor import colored
 from filetype import is_image
 from readchar import key
@@ -539,21 +538,6 @@ def explore_loop(current_path="."):
                         shutil.copytree(copy, current_path + NEXT_DIR + copy[copy.rfind(NEXT_DIR) + 1:], dirs_exist_ok=True)
                     else:
                         shutil.copy(copy, current_path)
-                    # if os.path.isdir(copy):
-                    #     copy_process = Process(target=lambda: shutil.copytree(copy, current_path + NEXT_DIR + copy[copy.rfind(NEXT_DIR) + 1:], dirs_exist_ok=True))
-                    # else:
-                    #     copy_process = Process(target=lambda: shutil.copy(copy, current_path))
-
-                    # copy_process.start()
-                    # copy_process.join(5)
-
-                    # if copy_process.is_alive():
-                    #     copy_process.terminate()
-                    #     copy_process.join()
-
-                    #     shutil.rmtree(current_path + NEXT_DIR + copy[copy.rfind(NEXT_DIR) + 1:], ignore_errors=True) # removing partial copy
-
-                    #     console.separateInteraction(message=get_move_copy_name(copy) + colored(' is too large to copy.\n', 'yellow'))
 
                 except Exception as e:
                     e = str(e)
@@ -592,7 +576,6 @@ def explore_loop(current_path="."):
 
         # clear all directories and files set to be copied and to be moved
         if command == key.CTRL_Z:
-
             changed = console.copy or console.move
 
             console.copy = []

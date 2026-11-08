@@ -29,6 +29,9 @@ Edit files and directories:
     - "    - ctrl+z -> clear all directories and files set to be copied and moved."
     - "    - delete -> move directory / file to recycle bin."
     - "    - ctrl+b -> open recycle bin in Windows File Explorer."
+    - ""
+    - "!! Important note: copying or deleting large directories / files (>1GB) may take a substantial amount of time."
+    - "It is preferable to copy and delete such files by opening the current directory with Tab and using the OS GUI."
 File and directory paths:
     - "    - ctrl+t -> print the tree of the current directory."
     - "    - ctrl+p -> print the path of selected the file or directory and copy it."

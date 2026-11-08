@@ -68,7 +68,7 @@ def get_file_color(filename, current_path, use_light_yellow=False):
     else:
         return "light_grey"
 
-def get_move_copy_name(path):
+def get_copy_move_name(path):
     filename  = path[path.rfind(NEXT_DIR) + 1:]
     filepath  = path[:path.rfind(NEXT_DIR)]
     return colored(filename, get_file_color(filename, filepath, use_light_yellow=True))
@@ -76,8 +76,8 @@ def get_move_copy_name(path):
 
 def set_top_text(console, current_path):
     top_text = colored(f'{HOMEDRIVE}\n', 'light_yellow') if current_path == f'{HOMEDRIVE}\\' else colored(f'{current_path}\n', 'light_yellow')
-    top_text += f"{colored('Copy', 'yellow')}: {', '.join(get_move_copy_name(copy) for copy in console.copy)}\n" if console.copy else ""
-    top_text += f"{colored('Move', 'yellow')}: {', '.join(get_move_copy_name(move) for move in console.move)}\n" if console.move else ""
+    top_text += f"{colored('Copy', 'yellow')}: {', '.join(get_copy_move_name(copy) for copy in console.copy)}\n" if console.copy else ""
+    top_text += f"{colored('Move', 'yellow')}: {', '.join(get_copy_move_name(move) for move in console.move)}\n" if console.move else ""
 
     console.setTopText(top_text)
 
@@ -553,7 +553,7 @@ def explore_loop(current_path="."):
                     if e[-1] != '.':
                         e += '.'
                 
-                    console.separateInteraction(message=f'\n{e}\n')
+                    console.separateInteraction(message=f'{colored("For", "yellow")} {get_copy_move_name(copy)}{colored(":", "yellow")}\n{e}\n')
 
             for move in console.move:
                 try:
@@ -568,7 +568,7 @@ def explore_loop(current_path="."):
                     if e[-1] != '.':
                         e += '.'
                 
-                    console.separateInteraction(message=f'\n{e}\n')
+                    console.separateInteraction(message=f'{colored("For", "yellow")} {get_copy_move_name(move)}{colored(":", "yellow")}\n{e}\n')
 
             changed = console.copy or console.move
 

@@ -618,6 +618,9 @@ def explore_loop(current_path="."):
                 if e[-1] != '.':
                     e += '.'
 
+                if "0x80270027" in e:
+                    e = colored("Directory is open in another application.\nClose the other application to be able to send to Recycle Bin.", "yellow")
+
                 console.separateInteraction(message=f'\n{e}\n')
 
             continue

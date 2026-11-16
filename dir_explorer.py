@@ -239,16 +239,6 @@ def explore_loop(current_path="."):
     files = get_files(console, current_path)
     console.updateList(files)
 
-    run_type = yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml"))["Selected"] # reading last selected run type
-
-    # just in case autocomplete file is corrupted
-    try:
-        goto_autocomplete = json.load(open(GOTOFILE, encoding="utf-8")) # reading automplete file
-    except:
-        with open(GOTOFILE, 'w', encoding='utf-8') as file:
-            json.dump({}, file)
-        goto_autocomplete = {}
-
     while (True):
         command, curr_pos = console.interact()
 
@@ -266,6 +256,7 @@ def explore_loop(current_path="."):
 
         # select run type
         if command == key.CTRL_S:
+            run_type = yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml"))["Selected"] # reading last selected run type
             run_type = console.separateInteraction(function=lambda: select_run_type(run_type))
 
             continue
@@ -296,6 +287,7 @@ def explore_loop(current_path="."):
                     console.updatePos(0)
 
                 else: 
+                    run_type = yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml"))["Selected"] # reading last selected run type
                     if '.' not in file[1:]:
                         # file has no extension, ignoring the '.' from hidden files
                         subprocess.run(f'start notepad {current_path + NEXT_DIR + file}', capture_output=False, shell=True)
@@ -385,6 +377,14 @@ def explore_loop(current_path="."):
         
         # go directly to directory
         if command == key.CTRL_G:
+            # just in case autocomplete file is corrupted
+            try:
+                goto_autocomplete = json.load(open(GOTOFILE, encoding="utf-8")) # reading automplete file
+            except:
+                with open(GOTOFILE, 'w', encoding='utf-8') as file:
+                    json.dump({}, file)
+                goto_autocomplete = {}
+
             goto_list = [key for key in goto_autocomplete] # list of autocomplete names
             new_dir = console.separateInteraction(function=lambda: autocomplete(goto_list, prompt=colored("Go to directory: ", "yellow")), showCursor=True).replace('/', NEXT_DIR)
             if new_dir in goto_autocomplete:

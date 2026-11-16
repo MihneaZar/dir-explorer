@@ -405,7 +405,7 @@ def explore_loop(current_path="."):
                 console.updateList(files)
                 console.updatePos(0)
 
-            else:
+            elif new_dir and not new_dir.isspace():
                 console.separateInteraction(message=colored("Directory not found.\n", "yellow"))
 
 

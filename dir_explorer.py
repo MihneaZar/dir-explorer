@@ -241,7 +241,13 @@ def explore_loop(current_path="."):
 
     run_type = yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml"))["Selected"] # reading last selected run type
 
-    goto_autocomplete = json.load(open(GOTOFILE, encoding="utf-8")) # reading automplete file
+    # just in case autocomplete file is corrupted
+    try:
+        goto_autocomplete = json.load(open(GOTOFILE, encoding="utf-8")) # reading automplete file
+    except:
+        with open(GOTOFILE, 'w', encoding='utf-8') as file:
+            json.dump({}, file)
+        goto_autocomplete = {}
 
     while (True):
         command, curr_pos = console.interact()
@@ -388,7 +394,7 @@ def explore_loop(current_path="."):
                 os.chdir(new_dir)
 
                 # resolving relative path
-                if new_dir[0] == '.':
+                if new_dir[0] == '.' or NEXT_DIR not in new_dir:
                     new_dir = os.getcwd()
 
                 # adding path to autocomplete if it's new

@@ -209,6 +209,17 @@ def run_exec(command, run_type):
 
 
 def explore_loop(current_path="."):
+    # just in case autocomplete file is corrupted
+    try:
+        goto_autocomplete = json.load(open(GOTOFILE, encoding="utf-8")) # reading automplete file
+    except:
+        with open(GOTOFILE, 'w', encoding='utf-8') as file:
+            json.dump({}, file)
+        goto_autocomplete = {}
+
+    if current_path in goto_autocomplete:
+        current_path = goto_autocomplete[current_path]
+
     # removing quotes from path, they just get in the way
     current_path = current_path.replace('\"', '')
     current_path = current_path.replace('\'', '')
@@ -221,10 +232,20 @@ def explore_loop(current_path="."):
     if not current_path or not os.path.isdir(current_path):
         current_path = os.getcwd()
 
-    # resolving relative path
-    if current_path[0] == '.':
+    else:
+        path_was_given = (current_path != ".") 
+        
+        # resolving relative path
         os.chdir(current_path)
         current_path = os.getcwd()
+
+        # if a path was given and its not in autocomplete, add it
+        if path_was_given:
+            autocomplete_name = current_path[current_path.rfind(NEXT_DIR) + 1:]
+            if autocomplete_name not in goto_autocomplete:
+                goto_autocomplete[autocomplete_name] = current_path
+                with open(GOTOFILE, 'w', encoding='utf-8') as file:
+                    json.dump(goto_autocomplete, file)
 
     # set working directory to current_path, in case it's been given as command-line argument 
     os.chdir(current_path)
@@ -256,6 +277,7 @@ def explore_loop(current_path="."):
 
         # select run type
         if command == key.CTRL_S:
+            # re-reading run_type in case it's been changed in a different dir-explorer
             run_type = yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml"))["Selected"] # reading last selected run type
             run_type = console.separateInteraction(function=lambda: select_run_type(run_type))
 
@@ -287,6 +309,7 @@ def explore_loop(current_path="."):
                     console.updatePos(0)
 
                 else: 
+                    # re-reading run_type in case it's been changed in a different dir-explorer
                     run_type = yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml"))["Selected"] # reading last selected run type
                     if '.' not in file[1:]:
                         # file has no extension, ignoring the '.' from hidden files
@@ -378,6 +401,7 @@ def explore_loop(current_path="."):
         # go directly to directory
         if command == key.CTRL_G:
             # just in case autocomplete file is corrupted
+            # re-reading autocomplete in case it's been changed in a different dir-explorer
             try:
                 goto_autocomplete = json.load(open(GOTOFILE, encoding="utf-8")) # reading automplete file
             except:
@@ -386,34 +410,34 @@ def explore_loop(current_path="."):
                 goto_autocomplete = {}
 
             goto_list = [key for key in goto_autocomplete] # list of autocomplete names
-            new_dir = console.separateInteraction(function=lambda: autocomplete(goto_list, prompt=colored("Go to directory: ", "yellow")), showCursor=True).replace('/', NEXT_DIR)
-            if new_dir in goto_autocomplete:
-                new_dir = goto_autocomplete[new_dir]
+            new_path = console.separateInteraction(function=lambda: autocomplete(goto_list, prompt=colored("Go to directory: ", "yellow")), showCursor=True).replace('/', NEXT_DIR)
+            if new_path in goto_autocomplete:
+                new_path = goto_autocomplete[new_path]
             
-            if os.path.isdir(new_dir):
-                os.chdir(new_dir)
+            if os.path.isdir(new_path):
+                os.chdir(new_path)
 
                 # resolving relative path
                 # might as well do this even if the path is actually absolute
-                new_dir = os.getcwd()
+                new_path = os.getcwd()
 
                 # adding path to autocomplete if it's new
-                autocomplete_name = new_dir[new_dir.rfind(NEXT_DIR) + 1:]
+                autocomplete_name = new_path[new_path.rfind(NEXT_DIR) + 1:]
                 if autocomplete_name not in goto_autocomplete:
-                    goto_autocomplete[autocomplete_name] = new_dir
+                    goto_autocomplete[autocomplete_name] = new_path
                     with open(GOTOFILE, 'w', encoding='utf-8') as file:
                         json.dump(goto_autocomplete, file)
 
-                current_path = new_dir
+                current_path = new_path
                     
                 files = get_files(console, current_path)
                         
                 console.updateList(files)
                 console.updatePos(0)
 
-            elif new_dir and not new_dir.isspace():
+            elif new_path and not new_path.isspace():
                 # removing path from autocomplete file if it does not exist anymore
-                autocomplete_name = new_dir[new_dir.rfind(NEXT_DIR) + 1:]
+                autocomplete_name = new_path[new_path.rfind(NEXT_DIR) + 1:]
                 if autocomplete_name in goto_autocomplete:
                     del goto_autocomplete[autocomplete_name]
                     with open(GOTOFILE, 'w', encoding='utf-8') as file:
@@ -705,9 +729,10 @@ def explore_loop(current_path="."):
 def main():
     if (len(sys.argv) == 2 and sys.argv[1] in ["-h", "--help"]):
         print("\nConsole application for easier movement through directories.")
-        print("\nUsage: 'python3 dir_explorer [rel_path | abs_path]'\n")
+        print("\nUsage: 'python3 dir_explorer [relative_path | absolute_path | saved_directory]'\n")
         print("Dir-Explorer will be open in directory given as path.")
-        print("Or it will open in current directory if no path is given or if path does not lead to a directory.\n")
+        print("If a directory was previously opened in Dir-Explorer by path, the path given can be simply its name.")
+        print("If the path is not given, or it does not lead to a directory, Dir-Explorer will open in the current directory.\n")
 
     else:
         current_path = " ".join(sys.argv[1:])

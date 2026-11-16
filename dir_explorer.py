@@ -394,8 +394,8 @@ def explore_loop(current_path="."):
                 os.chdir(new_dir)
 
                 # resolving relative path
-                if new_dir[0] == '.' or NEXT_DIR not in new_dir:
-                    new_dir = os.getcwd()
+                # might as well do this even if the path is actually absolute
+                new_dir = os.getcwd()
 
                 # adding path to autocomplete if it's new
                 autocomplete_name = new_dir[new_dir.rfind(NEXT_DIR) + 1:]
@@ -412,7 +412,15 @@ def explore_loop(current_path="."):
                 console.updatePos(0)
 
             elif new_dir and not new_dir.isspace():
-                console.separateInteraction(message=colored("Directory not found.\n", "yellow"))
+                # removing path from autocomplete file if it does not exist anymore
+                autocomplete_name = new_dir[new_dir.rfind(NEXT_DIR) + 1:]
+                if autocomplete_name in goto_autocomplete:
+                    del goto_autocomplete[autocomplete_name]
+                    with open(GOTOFILE, 'w', encoding='utf-8') as file:
+                        json.dump(goto_autocomplete, file)
+                    console.separateInteraction(message=colored("Directory path has changed or directory has been deleted.\n", "yellow"))
+                else:
+                    console.separateInteraction(message=colored("Directory not found.\n", "yellow"))
 
 
         # print current directory tree        

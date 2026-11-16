@@ -10,7 +10,7 @@ Console application for easier movement through directories (since W11 File Expl
 
 ## Additional Information
 The commands 'python3 dir_explorer.py -h' or 'python3 dir_explorer.py --help' explain how to give a path argument to the Dir-Explorer. <br>
-Typing '?' while in the app will open the help menu. <br>
+Typing '?' while in the app will open the help menu. <br><br>
 Only tested on Windows 11.
 
 -------------------------------------------------------------------------

@@ -8,6 +8,7 @@ import pyperclip
 import shutil
 import cursor
 import yaml
+import json
 import sys
 import os
 
@@ -18,6 +19,11 @@ if os.name == 'nt':
 
 HOMEPATH = os.path.dirname(os.path.realpath(__file__))
 DATAPATH = f"{HOMEPATH}/data"
+GOTOFILE = f"{DATAPATH}/goto_autocomplete.json" # autocomplete data for 'go to directory' (ctrl+G) command
+
+if not os.path.exists(GOTOFILE):
+    with open(GOTOFILE, 'w', encoding='utf-8') as file:
+        json.dump({}, file)
 
 sys.stderr = open(f'{DATAPATH}/errors.txt', "a")
 
@@ -31,7 +37,7 @@ RUN_STAY  = "Run in another tab and keep it open once finished"
 RUN_TYPES = [RUN_HERE, RUN_CLOSE, RUN_STAY]
 
 
-COMMAND_LIST = [key.ENTER, key.CTRL_S, key.CTRL_O, key.BACKSPACE, key.CTRL_T, key.CTRL_D, key.CTRL_P, key.TAB, '`', '~', 
+COMMAND_LIST = [key.ENTER, key.CTRL_S, key.CTRL_O, key.BACKSPACE, key.CTRL_G, key.CTRL_T, key.CTRL_D, key.CTRL_P, key.TAB, '`', '~', 
                 key.CTRL_N, key.CTRL_R, key.CTRL_C, key.CTRL_X, key.INSERT, key.CTRL_Z, key.DELETE, key.CTRL_B, key.CTRL_U, '?', key.ESC]
 
 RUNNABLES = ["exe", "py", "ba", "sh"]
@@ -233,7 +239,9 @@ def explore_loop(current_path="."):
     files = get_files(console, current_path)
     console.updateList(files)
 
-    run_type = yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml"))["Selected"]
+    run_type = yaml.safe_load(open(f"{DATAPATH}/running_type_menu.yaml"))["Selected"] # reading last selected run type
+
+    goto_autocomplete = json.load(open(GOTOFILE, encoding="utf-8")) # reading automplete file
 
     while (True):
         command, curr_pos = console.interact()
@@ -368,7 +376,38 @@ def explore_loop(current_path="."):
                 console.updatePos(files.index(prev_dir))
 
             continue
+        
+        # go directly to directory
+        if command == key.CTRL_G:
+            goto_list = [key for key in goto_autocomplete] # list of autocomplete names
+            new_dir = console.separateInteraction(function=lambda: autocomplete(goto_list, prompt=colored("Go to directory: ", "yellow")), showCursor=True).replace('/', NEXT_DIR)
+            if new_dir in goto_autocomplete:
+                new_dir = goto_autocomplete[new_dir]
             
+            if os.path.isdir(new_dir):
+                os.chdir(new_dir)
+
+                # resolving relative path
+                if new_dir[0] == '.':
+                    new_dir = os.getcwd()
+
+                # adding path to autocomplete if it's new
+                autocomplete_name = new_dir[new_dir.rfind(NEXT_DIR) + 1:]
+                if autocomplete_name not in goto_autocomplete:
+                    goto_autocomplete[autocomplete_name] = new_dir
+                    with open(GOTOFILE, 'w', encoding='utf-8') as file:
+                        json.dump(goto_autocomplete, file)
+
+                current_path = new_dir
+                    
+                files = get_files(console, current_path)
+                        
+                console.updateList(files)
+                console.updatePos(0)
+
+            else:
+                console.separateInteraction(message=colored("Directory not found.\n", "yellow"))
+
 
         # print current directory tree        
         if command == key.CTRL_T:

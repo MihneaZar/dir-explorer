@@ -7,6 +7,8 @@ How do I move in the current directory?:
     - "    - '\\'        -> find next directory / file that contains last searched string."
     - "    - enter      -> open directory (highlighted yellow) in current dir-explorer."
     - "    - backspace  -> return to parent directory of current directory."
+    - "    - ctrl+g     -> go directly to directory at given path (relative or absolute);"
+    - "                 -> previously entered directories can be typed by their name only (instead of their path)."
 Opening files and directories:
     - "    - enter  -> open file or directory:"
     - "                - open directory (highlighted yellow) in current dir-explorer;"

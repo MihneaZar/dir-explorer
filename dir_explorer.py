@@ -447,24 +447,15 @@ def explore_loop(current_path="."):
         
         # go directly to directory
         if command == key.CTRL_G:
-            # re-reading autocomplete in case it's been changed in a different dir-explorer
-            # using try in case autocomplete file has not been created yet or it has been corrupted
-            try:
-                goto_autocomplete = json.load(open(GOTOFILE, encoding="utf-8")) # reading automplete file
-            except:
-                # fixing goto_autocomplete file
-                with open(GOTOFILE, 'w', encoding='utf-8') as file:
-                    json.dump({}, file)
-                goto_autocomplete = {}
-
-            goto_list = [key for key in goto_autocomplete] # list of autocomplete names
             saved_string = [""] # using a vector for pass-by-reference
-            new_path = console.separateInteraction(function=lambda: autocomplete(update_goto_autocomplete("", saved_string), updateAutocomplete=lambda string: update_goto_autocomplete(string, saved_string), prompt=colored("Go to directory: ", "yellow")), showCursor=True).replace('/', NEXT_DIR)
+            new_path = console.separateInteraction(function=lambda: autocomplete(update_goto_autocomplete("", saved_string), updateAutocomplete=lambda string: update_goto_autocomplete(string, saved_string), prompt=colored("Go to directory: ", "yellow"), exitOnEsc=True), showCursor=True)
             if not new_path or new_path.isspace():
                 continue
             
             if new_path in goto_autocomplete:
                 new_path = goto_autocomplete[new_path]
+            else:
+                new_path = new_path.replace('/', NEXT_DIR)
             
             if os.path.isdir(new_path):
                 os.chdir(new_path)

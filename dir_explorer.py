@@ -411,6 +411,9 @@ def explore_loop(current_path="."):
 
             goto_list = [key for key in goto_autocomplete] # list of autocomplete names
             new_path = console.separateInteraction(function=lambda: autocomplete(goto_list, prompt=colored("Go to directory: ", "yellow")), showCursor=True).replace('/', NEXT_DIR)
+            if not new_path or new_path.isspace():
+                continue
+            
             if new_path in goto_autocomplete:
                 new_path = goto_autocomplete[new_path]
             
@@ -435,7 +438,7 @@ def explore_loop(current_path="."):
                 console.updateList(files)
                 console.updatePos(0)
 
-            elif new_path and not new_path.isspace():
+            else:
                 # removing path from autocomplete file if it does not exist anymore
                 autocomplete_name = new_path[new_path.rfind(NEXT_DIR) + 1:]
                 if autocomplete_name in goto_autocomplete:

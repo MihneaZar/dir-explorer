@@ -21,10 +21,6 @@ HOMEPATH = os.path.dirname(os.path.realpath(__file__))
 DATAPATH = f"{HOMEPATH}/data"
 GOTOFILE = f"{DATAPATH}/goto_autocomplete.json" # autocomplete data for 'go to directory' (ctrl+G) command
 
-if not os.path.exists(GOTOFILE):
-    with open(GOTOFILE, 'w', encoding='utf-8') as file:
-        json.dump({}, file)
-
 sys.stderr = open(f'{DATAPATH}/errors.txt', "a")
 
 NEXT_DIR  = '\\' # preferable for certain functionalities (rather than '/')
@@ -97,6 +93,56 @@ def get_files(console, current_path):
     set_top_text(console, current_path)
 
     return files
+
+
+def update_goto_autocomplete(curr_string, saved_string):
+    # using a vector for pass-by-reference
+    prev_string = saved_string[0]
+    saved_string[0] = curr_string
+
+    new_autocomplete = None
+
+    # input("prev_string: " + prev_string)
+    # input("curr_string: " + curr_string)
+
+    # the autocomplete list changes if:
+    # - a '\' or a '/' has been typed   (the current string ends in either slash and the previous string is shorter) -> moving further into a different directory
+    # - a '\' or a '/' has been deleted (the previous string ends in either slash and the current string is shorter) -> moving back into the previous directory 
+    # - the current string is empty -> moving into the current directory of the dir-explorer
+    if (curr_string.endswith(NEXT_DIR) or curr_string.endswith('/') and len(prev_string) < len(curr_string)) or \
+       (prev_string.endswith(NEXT_DIR) or prev_string.endswith('/') and len(curr_string) < len(prev_string)) or \
+       not curr_string:
+
+        # current directory is all the way to the final slash ('\' or '/') or it is '.\' (current dir from dir-explorer) if there are no slashes in string
+        last_slash = max(curr_string.rfind(NEXT_DIR), curr_string.rfind('/'))
+        curr_dir = curr_string[:last_slash + 1] if last_slash != -1 else ".\\"
+        clean_curr_dir = curr_dir.replace('/', NEXT_DIR) # using a 'clean' path (with only '\') since os.listdir and os.path.isdir have problems with '/'
+
+        # user might have typed a directory that does not actually exist
+        if os.path.isdir(clean_curr_dir): 
+
+            # only add the saved directories if in current dir from dir-explorer
+            if clean_curr_dir == ".\\":
+                # re-reading autocomplete in case it's been changed in a different dir-explorer
+                # using try in case autocomplete file has not been created yet or it has been corrupted
+                try:
+                    goto_autocomplete = json.load(open(GOTOFILE, encoding="utf-8")) # reading automplete file
+                except:
+                    # fixing goto_autocomplete file
+                    with open(GOTOFILE, 'w', encoding='utf-8') as file:
+                        json.dump({}, file)
+                    goto_autocomplete = {}
+                new_autocomplete = [saved_dir for saved_dir in goto_autocomplete]
+
+            else:
+                new_autocomplete = []
+            # input(new_autocomplete)
+
+            new_autocomplete += [(curr_dir if curr_dir != ".\\" else "") + dir for dir in os.listdir(clean_curr_dir) 
+                                 if os.path.isdir(clean_curr_dir + dir) and dir not in new_autocomplete] # avoiding adding same directory from saved and current directory
+
+    # input(new_autocomplete)
+    return new_autocomplete
 
 
 def print_filename(filename, max_name_width, current_path):
@@ -209,10 +255,11 @@ def run_exec(command, run_type):
 
 
 def explore_loop(current_path="."):
-    # just in case autocomplete file is corrupted
+    # using try in case autocomplete file has not been created yet or it has been corrupted
     try:
         goto_autocomplete = json.load(open(GOTOFILE, encoding="utf-8")) # reading automplete file
     except:
+        # fixing goto_autocomplete file
         with open(GOTOFILE, 'w', encoding='utf-8') as file:
             json.dump({}, file)
         goto_autocomplete = {}
@@ -400,17 +447,19 @@ def explore_loop(current_path="."):
         
         # go directly to directory
         if command == key.CTRL_G:
-            # just in case autocomplete file is corrupted
             # re-reading autocomplete in case it's been changed in a different dir-explorer
+            # using try in case autocomplete file has not been created yet or it has been corrupted
             try:
                 goto_autocomplete = json.load(open(GOTOFILE, encoding="utf-8")) # reading automplete file
             except:
+                # fixing goto_autocomplete file
                 with open(GOTOFILE, 'w', encoding='utf-8') as file:
                     json.dump({}, file)
                 goto_autocomplete = {}
 
             goto_list = [key for key in goto_autocomplete] # list of autocomplete names
-            new_path = console.separateInteraction(function=lambda: autocomplete(goto_list, prompt=colored("Go to directory: ", "yellow")), showCursor=True).replace('/', NEXT_DIR)
+            saved_string = [""] # using a vector for pass-by-reference
+            new_path = console.separateInteraction(function=lambda: autocomplete(update_goto_autocomplete("", saved_string), updateAutocomplete=lambda string: update_goto_autocomplete(string, saved_string), prompt=colored("Go to directory: ", "yellow")), showCursor=True).replace('/', NEXT_DIR)
             if not new_path or new_path.isspace():
                 continue
             
@@ -551,7 +600,7 @@ def explore_loop(current_path="."):
             file = files[curr_pos]
             color = get_file_color(file, current_path, use_light_yellow=True)
             
-            filename = console.separateInteraction(function=lambda: autocomplete([file], f"{colored('Rename', 'yellow')} {colored(file, color)} {colored('to:', 'yellow')}\n", exitOnEsc=True), showCursor=True)
+            filename = console.separateInteraction(function=lambda: autocomplete([file], prompt=f"{colored('Rename', 'yellow')} {colored(file, color)} {colored('to:', 'yellow')}\n", exitOnEsc=True), showCursor=True)
 
             if filename and not filename.isspace():
                 try:
